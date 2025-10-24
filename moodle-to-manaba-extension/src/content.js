@@ -470,9 +470,11 @@ function extractCourseInfos(courseCards) {
     // Clean up course name - remove extra whitespace and unwanted text
     let name = (link.textContent || "").trim();
     name = name.replace(/\s+/g, ' '); // Replace multiple whitespace with single space
-    name = name.replace(COURSE_NAME_PATTERNS.MAIN_EXTRACTION, '$2'); // Extract course code and name
-    name = name.replace(COURSE_NAME_PATTERNS.FALLBACK_EXTRACTION, '$1'); // Fallback extraction
-    
+    if (COURSE_NAME_PATTERNS.MAIN_EXTRACTION.test(name)) {
+      name = name.replace(COURSE_NAME_PATTERNS.MAIN_EXTRACTION, '$2'); // Extract course code and name
+    } else if (COURSE_NAME_PATTERNS.FALLBACK_EXTRACTION.test(name)) {
+      name = name.replace(COURSE_NAME_PATTERNS.FALLBACK_EXTRACTION, '$1'); // Fallback extraction
+    }
     if (!name) return;
     if (unique.has(url)) return;
     
