@@ -97,7 +97,7 @@ function createCourseEntry(course, schedule) {
     statusDiv.classList.add("coursestatus");
 
     const locationDiv = document.createElement("div");
-    locationDiv.classList.add("couraselocationinfo", "couraselocationinfoV2");
+    locationDiv.classList.add("courselocationinfo", "courselocationinfoV2");
     locationDiv.textContent = `${schedule.dayOfWeek}${schedule.period}:${schedule.classroom}`;
     locationDiv.setAttribute(
       "title",
