@@ -166,16 +166,28 @@ function init() {
   // EMERGENCY: Force immediate execution for debugging
   console.log("[M2M] EMERGENCY DEBUG MODE - Forcing immediate execution");
   
-  // Check URL patterns
+  // Check URL patterns for Moodle compatibility
   const currentUrl = window.location.href;
   console.log("[M2M] Current URL:", currentUrl);
+  
+  // More flexible URL checking
+  const isMoodlePage = (
+    currentUrl.includes('/my/') || 
+    currentUrl.includes('/my') ||
+    currentUrl.includes('moodle') ||
+    document.title.toLowerCase().includes('moodle') ||
+    document.querySelector('meta[name="generator"][content*="Moodle"]') ||
+    document.querySelector('.moodle-footer') ||
+    document.querySelector('#page-my-index')
+  );
+  
   console.log("[M2M] URL includes /my/:", currentUrl.includes('/my/'));
   console.log("[M2M] URL excludes /my/courses.php:", !currentUrl.includes('/my/courses.php'));
+  console.log("[M2M] Detected as Moodle page:", isMoodlePage);
   
-  // Check if this is the right page
-  if (!currentUrl.includes('/my/') || currentUrl.includes('/my/courses.php')) {
-    console.log("[M2M] Not on dashboard page, but FORCING execution for debug");
-    // DON'T return - continue for debugging
+  if (!isMoodlePage) {
+    console.log("[M2M] Not detected as Moodle page, but FORCING execution for debug");
+    // Continue execution for debugging
   }
   
   // Force check of page elements immediately
@@ -184,6 +196,17 @@ function init() {
   console.log("- Body classes:", document.body.className);
   console.log("- All course links:", document.querySelectorAll('a[href*="course/view.php"]').length);
   console.log("- All course-related elements:", document.querySelectorAll('[class*="course"], [data-region*="course"]').length);
+  
+  // Enhanced detection for any learning management system
+  const lmsIndicators = [
+    document.querySelectorAll('a[href*="course"]').length,
+    document.querySelectorAll('[class*="course"]').length,
+    document.querySelectorAll('[data-region*="course"]').length,
+    document.querySelectorAll('.coursename').length,
+    document.querySelectorAll('[class*="block"]').length
+  ];
+  
+  console.log("[M2M] LMS indicators:", lmsIndicators);
   
   // Force find any course content
   console.log("[M2M] FORCE: Looking for ANY course-related content");
@@ -196,14 +219,83 @@ function init() {
     }
   });
   
+  // Emergency test - create a simple timetable even if no courses are found
+  const createEmergencyTest = () => {
+    console.log("[M2M] EMERGENCY: Creating test timetable");
+    
+    // Create test wrapper
+    const testWrapper = document.createElement("div");
+    testWrapper.id = "emergency-test-timetable";
+    testWrapper.style.cssText = `
+      position: fixed;
+      top: 50px;
+      left: 50px;
+      width: 400px;
+      padding: 20px;
+      background: #e8f5e8;
+      border: 2px solid #4caf50;
+      border-radius: 8px;
+      z-index: 10000;
+      font-family: Arial, sans-serif;
+    `;
+    
+    testWrapper.innerHTML = `
+      <h3 style="margin: 0 0 15px 0; color: #2e7d32;">拡張機能テスト成功！</h3>
+      <p><strong>検出情報:</strong></p>
+      <ul>
+        <li>コースリンク: ${document.querySelectorAll('a[href*="course/view.php"]').length}個</li>
+        <li>課程要素: ${allCourseElements.length}個</li>
+        <li>LMS検出: ${isMoodlePage ? 'はい' : 'いいえ'}</li>
+      </ul>
+      <p>この緑のボックスが表示されれば、拡張機能は正常に動作しています。</p>
+      <button onclick="this.parentElement.remove()" style="margin-top: 10px; padding: 5px 10px;">閉じる</button>
+    `;
+    
+    document.body.appendChild(testWrapper);
+    
+    // Also test if we can create the actual timetable components
+    if (typeof generateManabaTable === 'function') {
+      console.log("[M2M] generateManabaTable function is available");
+      try {
+        // Test with dummy data
+        const testCourses = [{
+          name: "テスト科目",
+          url: "#",
+          schedule: [{
+            dayOfWeek: "月",
+            period: 1,
+            classroom: "テスト教室"
+          }]
+        }];
+        
+        const testTable = generateManabaTable(testCourses);
+        if (testTable) {
+          console.log("[M2M] Test timetable generated successfully");
+          testWrapper.appendChild(document.createElement("hr"));
+          const successMsg = document.createElement("p");
+          successMsg.textContent = "✅ 時間割生成機能も正常です";
+          successMsg.style.color = "#2e7d32";
+          testWrapper.appendChild(successMsg);
+        }
+      } catch (error) {
+        console.error("[M2M] Test timetable generation failed:", error);
+      }
+    } else {
+      console.error("[M2M] generateManabaTable function not available");
+    }
+  };
+  
   // Force immediate course card search
   console.log("[M2M] FORCE: Immediate course card search");
   setTimeout(() => {
     const cards = findCourseCards();
     console.log("[M2M] FORCE: Immediate search result:", cards.length, "cards");
     
+    // Always create emergency test
+    createEmergencyTest();
+    
     if (cards.length === 0) {
-      console.log("[M2M] FORCE: No cards found, trying to create dummy timetable");
+      console.log("[M2M] FORCE: No cards found, showing debug info");
       
       // Create emergency wrapper with status
       const emergencyWrapper = document.createElement("div");

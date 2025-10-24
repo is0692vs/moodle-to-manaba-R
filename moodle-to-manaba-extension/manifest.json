@@ -3,28 +3,22 @@
   "name": "Moodle to manaba Timetable",
   "version": "0.1.1",
   "description": "Moodleのコースリストをmanabaスタイルの時間割表示に変換します",
-  "permissions": ["storage"],
+  "permissions": ["storage", "activeTab"],
   "host_permissions": [
-    "*://*moodle*/*",
-    "*://*manaba*/*",
-    "*://*/moodle/*",
-    "*://*/my/*",
+    "https://*/*",
     "http://localhost:*/*"
   ],
   "content_scripts": [
     {
       "matches": [
-        "*://*moodle*/my/*",
-        "*://*moodle*/my",
-        "*://*/moodle/my/*",
-        "*://*/moodle/my",
-        "*://*/my/*", 
-        "*://*/my",
+        "https://*/my/*",
+        "https://*/my",
         "http://localhost:*/*"
       ],
       "js": ["src/parser.js", "src/tableGenerator.js", "src/content.js"],
       "css": ["src/styles.css"],
-      "run_at": "document_end"
+      "run_at": "document_end",
+      "all_frames": false
     }
   ],
   "icons": {
