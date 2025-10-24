@@ -22,7 +22,7 @@ function generateManabaTable(courses) {
 
   PERIODS.forEach((period) => {
     const row = table.insertRow();
-    
+
     // 時限ヘッダーセル
     const periodCell = row.insertCell();
     periodCell.classList.add("period");
@@ -38,7 +38,7 @@ function generateManabaTable(courses) {
         // 空のセル
         return;
       }
-      
+
       // 授業ありセル
       cell.classList.add("course-cell");
 
@@ -76,13 +76,13 @@ function buildCellMap(courses) {
 
 function createCourseEntry(course, schedule) {
   const container = document.createElement("div");
-  container.classList.add(
-    "courselistweekly-nonborder",
-    "courselistweekly-c"
-  );
-  
+  container.classList.add("courselistweekly-nonborder", "courselistweekly-c");
+
   // manabaスタイルのクリックハンドラを模倣
-  container.setAttribute('onclick', 'window.open(this.querySelector("a").href, "_self")');
+  container.setAttribute(
+    "onclick",
+    'window.open(this.querySelector("a").href, "_self")'
+  );
 
   const link = document.createElement("a");
   link.href = course.url;
@@ -95,12 +95,15 @@ function createCourseEntry(course, schedule) {
   if (schedule.classroom) {
     const statusDiv = document.createElement("div");
     statusDiv.classList.add("coursestatus");
-    
+
     const locationDiv = document.createElement("div");
     locationDiv.classList.add("couraselocationinfo", "couraselocationinfoV2");
     locationDiv.textContent = `${schedule.dayOfWeek}${schedule.period}:${schedule.classroom}`;
-    locationDiv.setAttribute('title', `${schedule.dayOfWeek}${schedule.period}:${schedule.classroom}`);
-    
+    locationDiv.setAttribute(
+      "title",
+      `${schedule.dayOfWeek}${schedule.period}:${schedule.classroom}`
+    );
+
     statusDiv.appendChild(locationDiv);
     container.appendChild(statusDiv);
   }

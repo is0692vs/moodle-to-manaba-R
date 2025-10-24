@@ -4,7 +4,7 @@
 const COURSE_CARD_SELECTOR = 'article[data-region="course"]';
 const COURSE_VIEW_CONTENT_SELECTOR = 'div[data-region="course-view-content"]';
 const COURSES_VIEW_SELECTOR = 'div[data-region="courses-view"]';
-const WRAPPER_ID = 'manaba-timetable-wrapper';
+const WRAPPER_ID = "manaba-timetable-wrapper";
 
 const courseCache = new Map();
 let observer = null;
@@ -22,8 +22,8 @@ function init() {
   scheduleProcessing();
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init, { once: true });
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", init, { once: true });
 } else {
   init();
 }
@@ -64,8 +64,10 @@ function scheduleProcessing() {
     try {
       await processCourseCards(cards);
     } catch (error) {
-      console.error('[M2M] Failed to process courses', error);
-      showStatus('時間割の生成中にエラーが発生しました。ページを更新してください。');
+      console.error("[M2M] Failed to process courses", error);
+      showStatus(
+        "時間割の生成中にエラーが発生しました。ページを更新してください。"
+      );
     }
   });
 }
@@ -81,7 +83,7 @@ async function processCourseCards(courseCards) {
   }
 
   lastProcessedCount = courseInfos.length;
-  showStatus('manabaスタイルの時間割を生成しています…');
+  showStatus("manabaスタイルの時間割を生成しています…");
   hideOriginalCourseView();
 
   const courses = [];
@@ -93,7 +95,7 @@ async function processCourseCards(courseCards) {
   }
 
   if (!courses.length) {
-    showStatus('時間割情報を含むコースが見つかりませんでした。');
+    showStatus("時間割情報を含むコースが見つかりませんでした。");
     return;
   }
 
@@ -104,11 +106,11 @@ async function processCourseCards(courseCards) {
 function extractCourseInfos(courseCards) {
   const unique = new Map();
   courseCards.forEach((card) => {
-    const link = card.querySelector('.coursename a, a.aalink');
+    const link = card.querySelector(".coursename a, a.aalink");
     if (!link) return;
     const url = normalizeUrl(link.href);
     if (!url) return;
-    const name = (link.textContent || '').trim();
+    const name = (link.textContent || "").trim();
     if (!name) return;
     if (unique.has(url)) return;
     unique.set(url, { name, url });
@@ -120,8 +122,8 @@ function normalizeUrl(href) {
   try {
     return new URL(href, window.location.origin).href;
   } catch (error) {
-    console.warn('[M2M] Invalid course URL skipped', href);
-    return '';
+    console.warn("[M2M] Invalid course URL skipped", href);
+    return "";
   }
 }
 
@@ -137,33 +139,33 @@ async function loadCourse(info) {
     courseCache.set(info.url, course);
     return course;
   } catch (error) {
-    console.error('[M2M] Failed to fetch course detail', info.url, error);
+    console.error("[M2M] Failed to fetch course detail", info.url, error);
     courseCache.set(info.url, null);
     return null;
   }
 }
 
 async function fetchCourseDocument(url) {
-  const response = await fetch(url, { credentials: 'include' });
+  const response = await fetch(url, { credentials: "include" });
   if (!response.ok) {
     throw new Error(`HTTP ${response.status}`);
   }
   const html = await response.text();
   const parser = new DOMParser();
-  return parser.parseFromString(html, 'text/html');
+  return parser.parseFromString(html, "text/html");
 }
 
 function renderTimetable(courses) {
   const wrapper = ensureWrapper();
-  wrapper.innerHTML = '';
+  wrapper.innerHTML = "";
   wrapper.appendChild(generateManabaTable(courses));
 }
 
 function hideOriginalCourseView() {
   const target = document.querySelector(COURSE_VIEW_CONTENT_SELECTOR);
   if (target) {
-    target.setAttribute('data-manaba-hidden', 'true');
-    target.style.display = 'none';
+    target.setAttribute("data-manaba-hidden", "true");
+    target.style.display = "none";
   }
 }
 
@@ -175,12 +177,12 @@ function ensureWrapper() {
 
   const container = document.querySelector(COURSES_VIEW_SELECTOR);
   if (!container) {
-    throw new Error('Course view container not found');
+    throw new Error("Course view container not found");
   }
 
-  wrapper = document.createElement('div');
+  wrapper = document.createElement("div");
   wrapper.id = WRAPPER_ID;
-  wrapper.classList.add('manaba-timetable-container');
+  wrapper.classList.add("manaba-timetable-container");
   container.prepend(wrapper);
   return wrapper;
 }
@@ -188,12 +190,12 @@ function ensureWrapper() {
 function showStatus(message) {
   try {
     const wrapper = ensureWrapper();
-    wrapper.innerHTML = '';
-    const status = document.createElement('div');
-    status.classList.add('manaba-timetable-status');
+    wrapper.innerHTML = "";
+    const status = document.createElement("div");
+    status.classList.add("manaba-timetable-status");
     status.textContent = message;
     wrapper.appendChild(status);
   } catch (error) {
-    console.warn('[M2M] Unable to display status', error);
+    console.warn("[M2M] Unable to display status", error);
   }
 }
