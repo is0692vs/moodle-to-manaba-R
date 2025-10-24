@@ -41,7 +41,7 @@ moodle-to-manaba-extension/
 ## 技術仕様
 
 - **Manifest Version**: 3
-- **対象サイト**: `https://moodle.ritsumei.ac.jp/my/*`, `https://lms.ritsumei.ac.jp/my/*`
+- **対象サイト**: `https://lms.ritsumei.ac.jp/my/*`
 - **動作方式**: Content Script
 - **スケジュール解析**: 正規表現による曜日・時限パターンマッチング
 - **テーブル構造**: 7 時限 ×6 曜日（manaba 互換）

@@ -44,8 +44,6 @@
 
 1. **以下のURLにアクセス:**
    ```
-   https://moodle.ritsumei.ac.jp/my/
-   または
    https://lms.ritsumei.ac.jp/my/
    ```
 
@@ -84,7 +82,7 @@
 2. **ページURL確認**
    ```
    デモページ: file:/// で始まるローカルファイル
-   実際のMoodle: https://moodle.ritsumei.ac.jp/my/ または https://lms.ritsumei.ac.jp/my/
+   実際のMoodle: https://lms.ritsumei.ac.jp/my/
    ```
 
 3. **開発者ツールでエラー確認**

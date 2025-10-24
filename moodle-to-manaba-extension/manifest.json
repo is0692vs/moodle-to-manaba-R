@@ -6,15 +6,11 @@
   "permissions": ["storage"],
   "host_permissions": [
     "https://manaba.ritsumei.ac.jp/*",
-    "https://moodle.ritsumei.ac.jp/*",
     "https://lms.ritsumei.ac.jp/*"
   ],
   "content_scripts": [
     {
-      "matches": [
-        "https://moodle.ritsumei.ac.jp/my/*",
-        "https://lms.ritsumei.ac.jp/my/*"
-      ],
+      "matches": ["https://lms.ritsumei.ac.jp/my/*"],
       "js": ["src/parser.js", "src/tableGenerator.js", "src/content.js"],
       "css": ["src/styles.css"],
       "run_at": "document_end"
