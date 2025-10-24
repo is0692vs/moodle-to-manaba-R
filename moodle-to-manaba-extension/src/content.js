@@ -161,10 +161,7 @@ function findCourseCards() {
 function init() {
   console.log("[M2M] Content script loaded on:", window.location.href);
   console.log("[M2M] Document ready state:", document.readyState);
-  console.log("[M2M] Extension version: Phase 1 MVP Debug");
-  
-  // EMERGENCY: Force immediate execution for debugging
-  console.log("[M2M] EMERGENCY DEBUG MODE - Forcing immediate execution");
+  console.log("[M2M] Extension version: Phase 1 MVP - Fixed Parser");
   
   // Check URL patterns for Moodle compatibility
   const currentUrl = window.location.href;
@@ -181,150 +178,13 @@ function init() {
     document.querySelector('#page-my-index')
   );
   
-  console.log("[M2M] URL includes /my/:", currentUrl.includes('/my/'));
-  console.log("[M2M] URL excludes /my/courses.php:", !currentUrl.includes('/my/courses.php'));
   console.log("[M2M] Detected as Moodle page:", isMoodlePage);
   
   if (!isMoodlePage) {
-    console.log("[M2M] Not detected as Moodle page, but FORCING execution for debug");
-    // Continue execution for debugging
+    console.log("[M2M] Not detected as Moodle page, skipping initialization");
+    return;
   }
-  
-  // Force check of page elements immediately
-  console.log("[M2M] FORCE: Immediate page structure check");
-  console.log("- Document title:", document.title);
-  console.log("- Body classes:", document.body.className);
-  console.log("- All course links:", document.querySelectorAll('a[href*="course/view.php"]').length);
-  console.log("- All course-related elements:", document.querySelectorAll('[class*="course"], [data-region*="course"]').length);
-  
-  // Enhanced detection for any learning management system
-  const lmsIndicators = [
-    document.querySelectorAll('a[href*="course"]').length,
-    document.querySelectorAll('[class*="course"]').length,
-    document.querySelectorAll('[data-region*="course"]').length,
-    document.querySelectorAll('.coursename').length,
-    document.querySelectorAll('[class*="block"]').length
-  ];
-  
-  console.log("[M2M] LMS indicators:", lmsIndicators);
-  
-  // Force find any course content
-  console.log("[M2M] FORCE: Looking for ANY course-related content");
-  const allCourseElements = document.querySelectorAll('*[class*="course"], *[data-region*="course"], a[href*="course"]');
-  console.log("[M2M] All course-related elements found:", allCourseElements.length);
-  
-  allCourseElements.forEach((el, i) => {
-    if (i < 5) { // Only log first 5 to avoid spam
-      console.log(`[M2M] Course element ${i+1}:`, el.tagName, el.className, el.textContent?.substring(0, 50));
-    }
-  });
-  
-  // Emergency test - create a simple timetable even if no courses are found
-  const createEmergencyTest = () => {
-    console.log("[M2M] EMERGENCY: Creating test timetable");
-    
-    // Create test wrapper
-    const testWrapper = document.createElement("div");
-    testWrapper.id = "emergency-test-timetable";
-    testWrapper.style.cssText = `
-      position: fixed;
-      top: 50px;
-      left: 50px;
-      width: 400px;
-      padding: 20px;
-      background: #e8f5e8;
-      border: 2px solid #4caf50;
-      border-radius: 8px;
-      z-index: 10000;
-      font-family: Arial, sans-serif;
-    `;
-    
-    testWrapper.innerHTML = `
-      <h3 style="margin: 0 0 15px 0; color: #2e7d32;">拡張機能テスト成功！</h3>
-      <p><strong>検出情報:</strong></p>
-      <ul>
-        <li>コースリンク: ${document.querySelectorAll('a[href*="course/view.php"]').length}個</li>
-        <li>課程要素: ${allCourseElements.length}個</li>
-        <li>LMS検出: ${isMoodlePage ? 'はい' : 'いいえ'}</li>
-      </ul>
-      <p>この緑のボックスが表示されれば、拡張機能は正常に動作しています。</p>
-      <button onclick="this.parentElement.remove()" style="margin-top: 10px; padding: 5px 10px;">閉じる</button>
-    `;
-    
-    document.body.appendChild(testWrapper);
-    
-    // Also test if we can create the actual timetable components
-    if (typeof generateManabaTable === 'function') {
-      console.log("[M2M] generateManabaTable function is available");
-      try {
-        // Test with dummy data
-        const testCourses = [{
-          name: "テスト科目",
-          url: "#",
-          schedule: [{
-            dayOfWeek: "月",
-            period: 1,
-            classroom: "テスト教室"
-          }]
-        }];
-        
-        const testTable = generateManabaTable(testCourses);
-        if (testTable) {
-          console.log("[M2M] Test timetable generated successfully");
-          testWrapper.appendChild(document.createElement("hr"));
-          const successMsg = document.createElement("p");
-          successMsg.textContent = "✅ 時間割生成機能も正常です";
-          successMsg.style.color = "#2e7d32";
-          testWrapper.appendChild(successMsg);
-        }
-      } catch (error) {
-        console.error("[M2M] Test timetable generation failed:", error);
-      }
-    } else {
-      console.error("[M2M] generateManabaTable function not available");
-    }
-  };
-  
-  // Force immediate course card search
-  console.log("[M2M] FORCE: Immediate course card search");
-  setTimeout(() => {
-    const cards = findCourseCards();
-    console.log("[M2M] FORCE: Immediate search result:", cards.length, "cards");
-    
-    // Always create emergency test
-    createEmergencyTest();
-    
-    if (cards.length === 0) {
-      console.log("[M2M] FORCE: No cards found, showing debug info");
-      
-      // Create emergency wrapper with status
-      const emergencyWrapper = document.createElement("div");
-      emergencyWrapper.id = "emergency-debug-wrapper";
-      emergencyWrapper.style.cssText = `
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        width: 300px;
-        padding: 20px;
-        background: #ffebee;
-        border: 2px solid #f44336;
-        border-radius: 8px;
-        z-index: 10000;
-        font-family: Arial, sans-serif;
-      `;
-      emergencyWrapper.innerHTML = `
-        <h4 style="margin: 0 0 10px 0; color: #d32f2f;">拡張機能デバッグ情報</h4>
-        <p><strong>URL:</strong> ${currentUrl}</p>
-        <p><strong>コースリンク:</strong> ${document.querySelectorAll('a[href*="course/view.php"]').length}個</p>
-        <p><strong>課程要素:</strong> ${allCourseElements.length}個</p>
-        <p><strong>状態:</strong> コース検出失敗</p>
-        <button onclick="this.parentElement.remove()" style="margin-top: 10px;">閉じる</button>
-      `;
-      document.body.appendChild(emergencyWrapper);
-    }
-  }, 1000);
-  
-  // Continue with normal initialization
+
   console.log("[M2M] Looking for course content with selectors:", ALTERNATIVE_SELECTORS.courseViewContent);
   
   const target = findElement(ALTERNATIVE_SELECTORS.courseViewContent);

@@ -1,5 +1,17 @@
 const DAY_KANJI = ["月", "火", "水", "木", "金", "土", "日"];
-const SCHEDULE_REGEX = /([月火水木金土日])\s*([0-9]{1,2})(?:\((\d+)-(\d+)\))?/g;
+
+// Updated regex patterns to handle different schedule formats
+const SCHEDULE_PATTERNS = [
+  // Pattern 1: 金1(1-2) - treat (1-2) as detail, not range - only use the main period
+  /([月火水木金土日])\s*([0-9]{1,2})\s*\([0-9]+-[0-9]+\)/g,
+  // Pattern 2: 金1,2,3 - comma separated periods
+  /([月火水木金土日])\s*([0-9]{1,2}(?:\s*,\s*[0-9]{1,2})*)/g,
+  // Pattern 3: 金1-3 - actual range without parentheses  
+  /([月火水木金土日])\s*([0-9]{1,2})\s*-\s*([0-9]{1,2})/g,
+  // Pattern 4: Simple 金1
+  /([月火水木金土日])\s*([0-9]{1,2})/g
+];
+
 const LOCATION_REGEX = /^\s*([月火水木金土日])\s*([0-9]{1,2})\s*[：:](.+)$/;
 
 /**
@@ -15,10 +27,13 @@ const LOCATION_REGEX = /^\s*([月火水木金土日])\s*([0-9]{1,2})\s*[：:](.+
  * @returns {ScheduleInfo[]} Parsed schedule entries.
  */
 function parseScheduleInfo(doc) {
+  console.log("[Parser] Starting schedule parsing...");
+  
   const summaryRoot = doc.querySelector(
     "section.block_course_summary .text_to_html"
   );
   if (!summaryRoot) {
+    console.log("[Parser] No course summary block found");
     return [];
   }
 
@@ -29,6 +44,8 @@ function parseScheduleInfo(doc) {
     .split("\n")
     .map((line) => line.trim())
     .filter(Boolean);
+
+  console.log("[Parser] Raw text lines:", rawText);
 
   if (!rawText.length) {
     return [];
@@ -42,41 +59,94 @@ function parseScheduleInfo(doc) {
     const period = parseInt(periodRaw, 10);
     if (Number.isNaN(period)) return;
     locationMap.set(makeKey(day, period), sanitizeLocation(location));
+    console.log("[Parser] Found location:", day, period, "->", location);
   });
 
   const scheduleText = rawText.join(" ");
+  console.log("[Parser] Combined schedule text:", scheduleText);
+  
   const schedules = [];
-  let match;
 
-  while ((match = SCHEDULE_REGEX.exec(scheduleText)) !== null) {
-    const [, day, primaryPeriodRaw, rangeStartRaw, rangeEndRaw] = match;
-    const primaryPeriod = parseInt(primaryPeriodRaw, 10);
-    if (!DAY_KANJI.includes(day) || Number.isNaN(primaryPeriod)) {
-      continue;
+  // Try each pattern in order of specificity
+  for (let i = 0; i < SCHEDULE_PATTERNS.length; i++) {
+    const pattern = SCHEDULE_PATTERNS[i];
+    const patternSchedules = [];
+    let match;
+
+    // Reset regex state
+    pattern.lastIndex = 0;
+    
+    while ((match = pattern.exec(scheduleText)) !== null) {
+      console.log("[Parser] Pattern", i + 1, "matched:", match);
+      
+      if (i === 0) {
+        // Pattern 1: 金1(1-2) - ignore the parentheses, treat as single period
+        const [, day, periodStr] = match;
+        const period = parseInt(periodStr, 10);
+        if (DAY_KANJI.includes(day) && !Number.isNaN(period)) {
+          const classroom = locationMap.get(makeKey(day, period));
+          patternSchedules.push({ dayOfWeek: day, period, classroom });
+          console.log("[Parser] Added single period (ignoring range):", day, period);
+        }
+      } else if (i === 1) {
+        // Pattern 2: 金1,2,3 - comma separated
+        const [, day, periodsStr] = match;
+        const periods = periodsStr.split(',').map(p => parseInt(p.trim(), 10)).filter(p => !Number.isNaN(p));
+        periods.forEach(period => {
+          if (DAY_KANJI.includes(day)) {
+            const classroom = locationMap.get(makeKey(day, period));
+            patternSchedules.push({ dayOfWeek: day, period, classroom });
+            console.log("[Parser] Added comma-separated period:", day, period);
+          }
+        });
+      } else if (i === 2) {
+        // Pattern 3: 金1-3 - actual range
+        const [, day, startStr, endStr] = match;
+        const start = parseInt(startStr, 10);
+        const end = parseInt(endStr, 10);
+        if (DAY_KANJI.includes(day) && !Number.isNaN(start) && !Number.isNaN(end) && end >= start) {
+          for (let period = start; period <= end; period++) {
+            const classroom = locationMap.get(makeKey(day, period));
+            patternSchedules.push({ dayOfWeek: day, period, classroom });
+            console.log("[Parser] Added range period:", day, period);
+          }
+        }
+      } else {
+        // Pattern 4: Simple 金1
+        const [, day, periodStr] = match;
+        const period = parseInt(periodStr, 10);
+        if (DAY_KANJI.includes(day) && !Number.isNaN(period)) {
+          const classroom = locationMap.get(makeKey(day, period));
+          patternSchedules.push({ dayOfWeek: day, period, classroom });
+          console.log("[Parser] Added simple period:", day, period);
+        }
+      }
     }
 
-    const rangeStart = rangeStartRaw ? parseInt(rangeStartRaw, 10) : null;
-    const rangeEnd = rangeEndRaw ? parseInt(rangeEndRaw, 10) : null;
-    const periods = expandPeriods(primaryPeriod, rangeStart, rangeEnd);
-
-    periods.forEach((period) => {
-      const classroom = locationMap.get(makeKey(day, period));
-      schedules.push({ dayOfWeek: day, period, classroom });
-    });
+    if (patternSchedules.length > 0) {
+      console.log("[Parser] Pattern", i + 1, "found", patternSchedules.length, "periods");
+      schedules.push(...patternSchedules);
+      break; // Use only the first matching pattern to avoid duplicates
+    }
   }
 
-  return dedupeSchedules(schedules);
+  const dedupedSchedules = dedupeSchedules(schedules);
+  console.log("[Parser] Final schedules:", dedupedSchedules);
+  
+  return dedupedSchedules;
 }
 
-function expandPeriods(primary, rangeStart, rangeEnd) {
-  if (rangeStart && rangeEnd && rangeEnd >= rangeStart) {
-    const periods = [];
-    for (let current = rangeStart; current <= rangeEnd; current += 1) {
-      periods.push(current);
+function dedupeSchedules(schedules) {
+  const seen = new Set();
+  return schedules.filter((entry) => {
+    const key = makeKey(entry.dayOfWeek, entry.period);
+    if (seen.has(key)) {
+      console.log("[Parser] Removing duplicate:", key);
+      return false;
     }
-    return periods;
-  }
-  return [primary];
+    seen.add(key);
+    return true;
+  });
 }
 
 function makeKey(day, period) {
@@ -85,16 +155,4 @@ function makeKey(day, period) {
 
 function sanitizeLocation(location) {
   return location.replace(/\s+/g, " ").trim();
-}
-
-function dedupeSchedules(schedules) {
-  const seen = new Set();
-  return schedules.filter((entry) => {
-    const key = makeKey(entry.dayOfWeek, entry.period);
-    if (seen.has(key)) {
-      return false;
-    }
-    seen.add(key);
-    return true;
-  });
 }
