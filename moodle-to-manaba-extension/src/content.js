@@ -46,6 +46,8 @@ const MAX_LOADING_PLACEHOLDERS = 50;
 // Course name extraction regex patterns
 const COURSE_NAME_PATTERNS = {
   // Extract course code and name from Moodle format: "prefix (code: name (semester))"
+  // This regex captures two groups: group 1 is the prefix ("コース星付き" or "コース名") and is discarded,
+  // group 2 is the course code and name (e.g., "12345: Course Name (2023年度)") and is used.
   MAIN_EXTRACTION: /^(コース星付き|コース名).*?\n.*?([0-9]+:[^)]+\([^)]+\)).*$/s,
   // Fallback extraction for simpler format
   FALLBACK_EXTRACTION: /^.*?([0-9]+:[^)]+\([^)]+\)).*$/s
@@ -77,7 +79,7 @@ function findCourseCards() {
   console.log("[M2M] Starting comprehensive course card search...");
   
   // First, check if we're dealing with loading placeholders
-  const placeholders = document.querySelectorAll('.bg-pulse-grey, .course-info-container .bg-pulse-grey');
+  const placeholders = document.querySelectorAll('.bg-pulse-grey');
   if (placeholders.length > 0) {
     console.log("[M2M] Found loading placeholders:", placeholders.length, "- content may still be loading");
     
@@ -576,7 +578,7 @@ function hideOriginalCourseView() {
   console.log("[M2M] Minimizing original course view (not hiding completely)...");
   const target = findElement(ALTERNATIVE_SELECTORS.courseViewContent);
   if (target) {
-    target.setAttribute("data-manaba-minimized", "true");
+    target.setAttribute("data-manaba-hidden", "true");
     // Lighter minimization - just reduce opacity slightly
     target.style.cssText = `
       opacity: 0.7 !important;
@@ -593,7 +595,6 @@ function restoreOriginalCourseView() {
   const target = findElement(ALTERNATIVE_SELECTORS.courseViewContent);
   if (target) {
     target.removeAttribute("data-manaba-hidden");
-    target.removeAttribute("data-manaba-minimized");
     target.style.cssText = "";
     console.log("[M2M] Original course view restored");
   }

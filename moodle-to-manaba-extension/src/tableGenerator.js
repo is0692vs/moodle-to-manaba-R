@@ -2,7 +2,7 @@ const DAY_LABELS = ["月", "火", "水", "木", "金", "土"];
 const PERIODS = [1, 2, 3, 4, 5, 6, 7];
 
 /**
- * Builds a 7x6 table mirroring the manaba timetable layout.
+ * Builds a 7 periods × 6 days table (7×6, periods × days) mirroring the manaba timetable layout.
  * @param {{name: string, url: string, schedule: {dayOfWeek: string, period: number, classroom?: string}[]}} courses
  *   Courses enriched with schedule data and the derived timetable cells.
  * @returns {HTMLTableElement} Generated timetable element.
