@@ -564,7 +564,8 @@ function renderTimetable(courses) {
     
     console.log("[M2M] Timetable render complete");
     
-    // Force a reflow to ensure elements are displayed
+    // Force a reflow to ensure the browser recalculates layout and applies all style changes
+    // before displaying the timetable. This helps prevent rendering glitches after dynamic DOM updates.
     wrapper.offsetHeight;
     
   } catch (error) {
