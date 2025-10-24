@@ -36,10 +36,10 @@
             const container = document.querySelector('[data-region="course-view-content"]');
             
             const courseData = [
-                { id: '12345', name: '52103:スポーツ方法実習Ⅱ(C)(24)', summary: '秋セメスタ－・金1(1-2)' },
-                { id: '12346', name: '51201:プログラミング基礎I(A)(24)', summary: '秋セメスタ－・火2' },
-                { id: '12347', name: '50105:数学解析I(B)(24)', summary: '秋セメスタ－・月3' },
-                { id: '12348', name: '53301:英語コミュニケーション(D)(24)', summary: '秋セメスタ－・水1' }
+                { id: '12345', name: 'XXXXX:サンプル科目A(A)(24)', summary: '秋セメスタ－・金1(1-2)' },
+                { id: '12346', name: 'YYYYY:サンプル科目B(B)(24)', summary: '秋セメスタ－・火2' },
+                { id: '12347', name: 'ZZZZZ:サンプル科目C(C)(24)', summary: '秋セメスタ－・月3' },
+                { id: '12348', name: 'WWWWW:サンプル科目D(D)(24)', summary: '秋セメスタ－・水1' }
             ];
 
             courseData.forEach(course => {
@@ -50,7 +50,7 @@
                 card.innerHTML = `
                     <div class="card-body">
                         <div data-region="course-name" class="coursename">
-                            <a class="aalink" href="https://lms.ritsumei.ac.jp/course/view.php?id=${course.id}">
+                            <a class="aalink" href="https://example.university.edu/course/view.php?id=${course.id}">
                                 ${course.name}
                             </a>
                         </div>
@@ -68,10 +68,10 @@
 
         // Mock fetch for course details
         const mockCourseDetails = {
-            '12345': '<section class="block_course_summary"><div class="text_to_html">秋セメスタ－・金1(1-2)<br>金1:トレーニングルーム</div></section>',
-            '12346': '<section class="block_course_summary"><div class="text_to_html">秋セメスタ－・火2<br>火2:コンピュータ演習室1</div></section>',
-            '12347': '<section class="block_course_summary"><div class="text_to_html">秋セメスタ－・月3<br>月3:第1講義室</div></section>',
-            '12348': '<section class="block_course_summary"><div class="text_to_html">秋セメスタ－・水1<br>水1:語学演習室2</div></section>'
+            '12345': '<section class="block_course_summary"><div class="text_to_html">秋セメスタ－・金1(1-2)<br>金1:サンプル教室1</div></section>',
+            '12346': '<section class="block_course_summary"><div class="text_to_html">秋セメスタ－・火2<br>火2:サンプル教室2</div></section>',
+            '12347': '<section class="block_course_summary"><div class="text_to_html">秋セメスタ－・月3<br>月3:サンプル教室3</div></section>',
+            '12348': '<section class="block_course_summary"><div class="text_to_html">秋セメスタ－・水1<br>水1:サンプル教室4</div></section>'
         };
 
         const originalFetch = window.fetch;

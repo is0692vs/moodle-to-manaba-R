@@ -18,7 +18,7 @@ Moodle のコースリストを manaba スタイルの時間割表示に変換�
 
 1. Chrome 拡張機能の開発者モードを有効にする (`chrome://extensions/`)
 2. 「パッケージ化されていない拡張機能を読み込む」でこのディレクトリを読み込む
-3. Moodle のマイページ（`https://moodle.ritsumei.ac.jp/my/` または `https://lms.ritsumei.ac.jp/my/`）にアクセス
+3. Moodle のマイページ（`https://your-university-moodle.edu/my/`）にアクセス
 4. コース一覧が manaba スタイルの時間割テーブルに置き換わることを確認
 
 ## ディレクトリ構成
@@ -41,7 +41,7 @@ moodle-to-manaba-extension/
 ## 技術仕様
 
 - **Manifest Version**: 3
-- **対象サイト**: `https://lms.ritsumei.ac.jp/my/*`
+- **対象サイト**: `https://your-university-moodle.edu/my/*`
 - **動作方式**: Content Script
 - **スケジュール解析**: 正規表現による曜日・時限パターンマッチング
 - **テーブル構造**: 7 時限 ×6 曜日（manaba 互換）
@@ -70,6 +70,27 @@ moodle-to-manaba-extension/
 - 大量のコースがある場合のパフォーマンス最適化は未実装
 - ネットワーク遅延時の詳細なローディング表示は簡易版
 - キャッシュ機能は実装済み（メモリ内、セッション限定）
+
+## 設定
+
+使用する大学に合わせて `manifest.json` の以下の部分を変更してください：
+
+```json
+{
+  "host_permissions": [
+    "https://manaba.your-university.edu/*",
+    "https://moodle.your-university.edu/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://moodle.your-university.edu/my/*",
+        "https://moodle.your-university.edu/my"
+      ]
+    }
+  ]
+}
+```
 
 ## 今後の改善予定（Phase 2/3）
 

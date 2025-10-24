@@ -12,14 +12,14 @@
 4. **「パッケージ化されていない拡張機能を読み込む」をクリック**
 5. **以下のフォルダを選択:**
    ```
-   /Users/hirokimukai/Cloudprojects/moodle-to-manaba-R/moodle-to-manaba-extension
+   /path/to/moodle-to-manaba-extension
    ```
 
 ### ステップ 2: ローカルデモでテスト
 
 1. **デモページを開く**
    ```
-   file:///Users/hirokimukai/Cloudprojects/moodle-to-manaba-R/moodle-to-manaba-extension/demo/test-moodle.html
+   file:///path/to/moodle-to-manaba-extension/demo/test-moodle.html
    ```
    
    または Finderで `demo/test-moodle.html` をダブルクリック
@@ -35,7 +35,7 @@
 ## 方法2: 実際のMoodleでテスト
 
 ### 前提条件
-- 立命館大学のMoodleアカウント
+- 大学のMoodleアカウント
 - コースに登録済み
 
 ### ステップ 1: Chrome拡張機能をインストール（上記と同じ）
@@ -44,7 +44,7 @@
 
 1. **以下のURLにアクセス:**
    ```
-   https://lms.ritsumei.ac.jp/my/
+   https://your-university-moodle.edu/my/
    ```
 
 2. **ログインしてマイページを表示**
@@ -82,7 +82,7 @@
 2. **ページURL確認**
    ```
    デモページ: file:/// で始まるローカルファイル
-   実際のMoodle: https://lms.ritsumei.ac.jp/my/
+   実際のMoodle: https://your-university-moodle.edu/my/
    ```
 
 3. **開発者ツールでエラー確認**
