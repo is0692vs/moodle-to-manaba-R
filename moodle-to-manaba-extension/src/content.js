@@ -1,5 +1,5 @@
-import { parseScheduleInfo } from "./parser.js";
-import { generateManabaTable } from "./tableGenerator.js";
+// Load parser and table generator via script injection
+// Since we removed ES6 module support from manifest, we'll use global functions
 
 const COURSE_CARD_SELECTOR = 'article[data-region="course"]';
 const COURSE_VIEW_CONTENT_SELECTOR = 'div[data-region="course-view-content"]';

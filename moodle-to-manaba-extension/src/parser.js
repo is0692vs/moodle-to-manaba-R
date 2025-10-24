@@ -14,7 +14,7 @@ const LOCATION_REGEX = /^\s*([月火水木金土日])\s*([0-9]{1,2})\s*[：:](.+
  * @param {Document} doc - The fetched course detail document.
  * @returns {ScheduleInfo[]} Parsed schedule entries.
  */
-export function parseScheduleInfo(doc) {
+function parseScheduleInfo(doc) {
   const summaryRoot = doc.querySelector(
     "section.block_course_summary .text_to_html"
   );

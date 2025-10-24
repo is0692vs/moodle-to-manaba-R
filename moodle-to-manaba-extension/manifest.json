@@ -12,10 +12,9 @@
   "content_scripts": [
     {
       "matches": ["https://moodle.ritsumei.ac.jp/my/*", "https://lms.ritsumei.ac.jp/my/*"],
-      "js": ["src/content.js"],
+      "js": ["src/parser.js", "src/tableGenerator.js", "src/content.js"],
       "css": ["src/styles.css"],
-      "run_at": "document_end",
-      "type": "module"
+      "run_at": "document_end"
     }
   ],
   "icons": {

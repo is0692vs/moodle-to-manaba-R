@@ -13,68 +13,90 @@
   padding: 32px 0;
 }
 
+/* manaba スタイルの時間割テーブル */
 .stdlist {
   width: 100%;
   border-collapse: collapse;
   background: #fff;
-  font-size: 14px;
+  font-size: 13px;
+  table-layout: fixed;
 }
 
 .stdlist th,
 .stdlist td {
   border: 1px solid #c8d7e1;
-  padding: 10px 12px;
+  padding: 8px;
 }
 
 .stdlist th.top {
   background: #e8f4f8;
   text-align: center;
-  font-weight: 700;
+  font-weight: bold;
+  color: #333;
 }
 
-.stdlist th.period {
-  background: #f4fbff;
-  width: 56px;
+.stdlist th.courselistweekly-period {
+  background: #e8f4f8;
+  width: 40px;
+}
+
+.stdlist td.period {
+  background: #f4f7fa;
+  width: 40px;
   text-align: center;
+  font-weight: bold;
+  color: #666;
+}
+
+.stdlist td.course {
+  min-height: 70px;
+  vertical-align: top;
+  background: #fff;
+  padding: 4px;
 }
 
 .stdlist td.course-cell {
-  min-height: 80px;
-  vertical-align: top;
   background: #fdfefe;
 }
 
-.stdlist td.course-cell.empty {
-  background: #f5f7f9;
+/* manabaスタイルのコース表示 */
+.courselistweekly-nonborder {
+  background: #f0f8ff;
+  border: 1px solid #d0e7ff;
+  border-radius: 3px;
+  padding: 6px;
+  margin-bottom: 4px;
+  cursor: pointer;
 }
 
-.manaba-course-entry {
-  margin-bottom: 10px;
-  padding: 8px;
-  border-radius: 6px;
-  background: #eef6fb;
-  box-shadow: inset 0 0 0 1px #d3e5f1;
+.courselistweekly-nonborder:hover {
+  background: #e6f3ff;
 }
 
-.manaba-course-entry:last-child {
-  margin-bottom: 0;
-}
-
-.course-link {
-  color: #0064c8;
-  font-weight: 600;
+.courselistweekly-c a {
+  color: #0066cc;
   text-decoration: none;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 2px;
 }
 
-.course-link:hover,
-.course-link:focus {
+.courselistweekly-c a:hover {
   text-decoration: underline;
 }
 
-.course-location {
+.coursestatus {
   margin-top: 4px;
-  font-size: 12px;
-  color: #2e4a62;
+}
+
+.couraselocationinfoV2 {
+  font-size: 11px;
+  color: #666;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 2px;
+  padding: 2px 4px;
+  display: inline-block;
 }
 
 [data-region="course-view-content"][data-manaba-hidden="true"] {

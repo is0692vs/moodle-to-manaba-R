@@ -7,7 +7,7 @@ const PERIODS = [1, 2, 3, 4, 5, 6, 7];
  *   Courses enriched with schedule data and the derived timetable cells.
  * @returns {HTMLTableElement} Generated timetable element.
  */
-export function generateManabaTable(courses) {
+function generateManabaTable(courses) {
   const table = document.createElement("table");
   table.classList.add("stdlist", "manaba-timetable");
 
@@ -22,18 +22,25 @@ export function generateManabaTable(courses) {
 
   PERIODS.forEach((period) => {
     const row = table.insertRow();
-    row.appendChild(createHeaderCell(String(period), "period"));
+    
+    // 時限ヘッダーセル
+    const periodCell = row.insertCell();
+    periodCell.classList.add("period");
+    periodCell.textContent = String(period);
 
     DAY_LABELS.forEach((day) => {
       const cell = row.insertCell();
-      cell.classList.add("course", "course-cell");
+      cell.classList.add("course");
 
       const key = makeKey(day, period);
       const entries = cellMap.get(key);
       if (!entries || !entries.length) {
-        cell.classList.add("empty");
+        // 空のセル
         return;
       }
+      
+      // 授業ありセル
+      cell.classList.add("course-cell");
 
       entries.forEach(({ course, schedule }) => {
         cell.appendChild(createCourseEntry(course, schedule));
@@ -71,9 +78,11 @@ function createCourseEntry(course, schedule) {
   const container = document.createElement("div");
   container.classList.add(
     "courselistweekly-nonborder",
-    "courselistweekly-c",
-    "manaba-course-entry"
+    "courselistweekly-c"
   );
+  
+  // manabaスタイルのクリックハンドラを模倣
+  container.setAttribute('onclick', 'window.open(this.querySelector("a").href, "_self")');
 
   const link = document.createElement("a");
   link.href = course.url;
@@ -82,11 +91,18 @@ function createCourseEntry(course, schedule) {
   link.target = "_self";
   container.appendChild(link);
 
+  // コースステータス（教室情報）
   if (schedule.classroom) {
-    const location = document.createElement("div");
-    location.classList.add("course-location");
-    location.textContent = schedule.classroom;
-    container.appendChild(location);
+    const statusDiv = document.createElement("div");
+    statusDiv.classList.add("coursestatus");
+    
+    const locationDiv = document.createElement("div");
+    locationDiv.classList.add("couraselocationinfo", "couraselocationinfoV2");
+    locationDiv.textContent = `${schedule.dayOfWeek}${schedule.period}:${schedule.classroom}`;
+    locationDiv.setAttribute('title', `${schedule.dayOfWeek}${schedule.period}:${schedule.classroom}`);
+    
+    statusDiv.appendChild(locationDiv);
+    container.appendChild(statusDiv);
   }
 
   return container;
@@ -96,4 +112,6 @@ function makeKey(day, period) {
   return `${day}-${period}`;
 }
 
-export { DAY_LABELS, PERIODS };
+// Make DAY_LABELS and PERIODS available globally if needed
+window.M2M_DAY_LABELS = DAY_LABELS;
+window.M2M_PERIODS = PERIODS;
