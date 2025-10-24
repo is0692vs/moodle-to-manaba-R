@@ -677,7 +677,7 @@ function monitorNetworkActivity() {
     console.log("[M2M] Loading check - Indicators:", indicators.length, "Placeholders:", placeholders.length, "Course links:", courseLinks.length);
     
     // If we have course links and no loading indicators, content is likely loaded
-    if (courseLinks.length > 0 && indicators.length === 0 && placeholders.length < MAX_LOADING_PLACEHOLDERS) {
+    if (courseLinks.length > 0 && indicators.length === 0 && placeholders.length === 0) {
       console.log("[M2M] Network activity appears complete, triggering course processing");
       clearInterval(checkInterval);
       setTimeout(() => scheduleProcessing(), 1000);
