@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Moodle to manaba Timetable",
+  "version": "0.1.0",
+  "description": "Moodleのコースリストをmanabaスタイルの時間割表示に変換します",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://manaba.example.edu/*",
+    "https://moodle.example.edu/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://moodle.example.edu/my/*",
+        "https://moodle.example.edu/my",
+        "http://localhost:8080/*"
+      ],
+      "js": ["src/parser.js", "src/tableGenerator.js", "src/content.js"],
+      "css": ["src/styles.css"],
+      "run_at": "document_end"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
