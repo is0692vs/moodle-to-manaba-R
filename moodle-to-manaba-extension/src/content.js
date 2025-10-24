@@ -37,6 +37,20 @@ const ALTERNATIVE_SELECTORS = {
   ]
 };
 
+// Timing constants
+const BASE_RETRY_DELAY_MS = 3000;
+const RETRY_DELAY_INCREMENT_MS = 2000;
+const MAX_RETRY_DELAY_MS = 10000;
+const MAX_LOADING_PLACEHOLDERS = 50;
+
+// Course name extraction regex patterns
+const COURSE_NAME_PATTERNS = {
+  // Extract course code and name from Moodle format: "prefix (code: name (semester))"
+  MAIN_EXTRACTION: /^(コース星付き|コース名).*?\n.*?([0-9]+:[^)]+\([^)]+\)).*$/s,
+  // Fallback extraction for simpler format
+  FALLBACK_EXTRACTION: /^.*?([0-9]+:[^)]+\([^)]+\)).*$/s
+};
+
 const courseCache = new Map();
 let observer = null;
 let hasRendered = false;
@@ -274,7 +288,7 @@ function scheduleProcessing() {
     if (!cards.length) {
       retryCount++;
       if (retryCount < MAX_RETRIES) {
-        const delay = Math.min(3000 + (retryCount * 2000), 10000); // Progressive delay up to 10 seconds
+        const delay = Math.min(BASE_RETRY_DELAY_MS + (retryCount * RETRY_DELAY_INCREMENT_MS), MAX_RETRY_DELAY_MS); // Progressive delay
         console.log("[M2M] No course cards found, retrying in", delay, "ms...");
         setTimeout(() => scheduleProcessing(), delay);
       } else {
@@ -454,8 +468,8 @@ function extractCourseInfos(courseCards) {
     // Clean up course name - remove extra whitespace and unwanted text
     let name = (link.textContent || "").trim();
     name = name.replace(/\s+/g, ' '); // Replace multiple whitespace with single space
-    name = name.replace(/^(コース星付き|コース名).*?\n.*?([0-9]+:[^)]+\([^)]+\)).*$/s, '$2'); // Extract course code and name
-    name = name.replace(/^.*?([0-9]+:[^)]+\([^)]+\)).*$/s, '$1'); // Fallback extraction
+    name = name.replace(COURSE_NAME_PATTERNS.MAIN_EXTRACTION, '$2'); // Extract course code and name
+    name = name.replace(COURSE_NAME_PATTERNS.FALLBACK_EXTRACTION, '$1'); // Fallback extraction
     
     if (!name) return;
     if (unique.has(url)) return;
@@ -662,7 +676,7 @@ function monitorNetworkActivity() {
     console.log("[M2M] Loading check - Indicators:", indicators.length, "Placeholders:", placeholders.length, "Course links:", courseLinks.length);
     
     // If we have course links and no loading indicators, content is likely loaded
-    if (courseLinks.length > 0 && indicators.length === 0 && placeholders.length < 50) {
+    if (courseLinks.length > 0 && indicators.length === 0 && placeholders.length < MAX_LOADING_PLACEHOLDERS) {
       console.log("[M2M] Network activity appears complete, triggering course processing");
       clearInterval(checkInterval);
       setTimeout(() => scheduleProcessing(), 1000);
