@@ -156,6 +156,7 @@ function findCourseCards() {
 function init() {
   console.log("[M2M] Content script loaded on:", window.location.href);
   console.log("[M2M] Document ready state:", document.readyState);
+  console.log("[M2M] Extension version: Phase 1 MVP");
   
   // Check if this is the right page
   if (!window.location.href.includes('/my/') || window.location.href.includes('/my/courses.php')) {
@@ -289,6 +290,7 @@ function scheduleProcessing() {
     
     if (!cards.length) {
       retryCount++;
+      console.log("[M2M] No course cards found, retry count:", retryCount);
       if (retryCount < MAX_RETRIES) {
         const delay = Math.min(BASE_RETRY_DELAY_MS + (retryCount * RETRY_DELAY_INCREMENT_MS), MAX_RETRY_DELAY_MS); // Progressive delay
         console.log("[M2M] No course cards found, retrying in", delay, "ms...");
@@ -581,7 +583,7 @@ function hideOriginalCourseView() {
   console.log("[M2M] Minimizing original course view (not hiding completely)...");
   const target = findElement(ALTERNATIVE_SELECTORS.courseViewContent);
   if (target) {
-    target.setAttribute("data-manaba-hidden", "true");
+    // Don't set data-manaba-hidden, just reduce opacity to keep content visible
     // Lighter minimization - just reduce opacity slightly
     target.style.cssText = `
       opacity: 0.7 !important;
@@ -597,7 +599,6 @@ function restoreOriginalCourseView() {
   console.log("[M2M] Restoring original course view...");
   const target = findElement(ALTERNATIVE_SELECTORS.courseViewContent);
   if (target) {
-    target.removeAttribute("data-manaba-hidden");
     target.style.cssText = "";
     console.log("[M2M] Original course view restored");
   }
@@ -680,7 +681,7 @@ function monitorNetworkActivity() {
     console.log("[M2M] Loading check - Indicators:", indicators.length, "Placeholders:", placeholders.length, "Course links:", courseLinks.length);
     
     // If we have course links and no loading indicators, content is likely loaded
-    if (courseLinks.length > 0 && indicators.length === 0 && placeholders.length === 0) {
+    if (courseLinks.length > 0 && indicators.length === 0 && placeholders.length < MAX_LOADING_PLACEHOLDERS) {
       console.log("[M2M] Network activity appears complete, triggering course processing");
       clearInterval(checkInterval);
       setTimeout(() => scheduleProcessing(), 1000);
