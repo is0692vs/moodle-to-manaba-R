@@ -1,6 +1,11 @@
 // Load parser and table generator via script injection
 // Since we removed ES6 module support from manifest, we'll use global functions
 
+// Debug: Check if required functions are loaded
+console.log("[M2M] Checking required functions:");
+console.log("- parseScheduleInfo available:", typeof parseScheduleInfo);
+console.log("- generateManabaTable available:", typeof generateManabaTable);
+
 const COURSE_CARD_SELECTOR = 'article[data-region="course"]';
 const COURSE_VIEW_CONTENT_SELECTOR = 'div[data-region="course-view-content"]';
 const COURSES_VIEW_SELECTOR = 'div[data-region="courses-view"]';
@@ -156,20 +161,78 @@ function findCourseCards() {
 function init() {
   console.log("[M2M] Content script loaded on:", window.location.href);
   console.log("[M2M] Document ready state:", document.readyState);
-  console.log("[M2M] Extension version: Phase 1 MVP");
+  console.log("[M2M] Extension version: Phase 1 MVP Debug");
+  
+  // EMERGENCY: Force immediate execution for debugging
+  console.log("[M2M] EMERGENCY DEBUG MODE - Forcing immediate execution");
+  
+  // Check URL patterns
+  const currentUrl = window.location.href;
+  console.log("[M2M] Current URL:", currentUrl);
+  console.log("[M2M] URL includes /my/:", currentUrl.includes('/my/'));
+  console.log("[M2M] URL excludes /my/courses.php:", !currentUrl.includes('/my/courses.php'));
   
   // Check if this is the right page
-  if (!window.location.href.includes('/my/') || window.location.href.includes('/my/courses.php')) {
-    console.log("[M2M] Not on dashboard page, skipping initialization");
-    return;
+  if (!currentUrl.includes('/my/') || currentUrl.includes('/my/courses.php')) {
+    console.log("[M2M] Not on dashboard page, but FORCING execution for debug");
+    // DON'T return - continue for debugging
   }
   
-  // Log page structure for debugging
-  console.log("[M2M] Page structure analysis:");
+  // Force check of page elements immediately
+  console.log("[M2M] FORCE: Immediate page structure check");
+  console.log("- Document title:", document.title);
   console.log("- Body classes:", document.body.className);
-  console.log("- Main elements:", Array.from(document.querySelectorAll('main, #page-content, #region-main')).map(el => el.id || el.className));
-  console.log("- Course-related elements:", Array.from(document.querySelectorAll('[class*="course"], [data-region*="course"]')).length);
+  console.log("- All course links:", document.querySelectorAll('a[href*="course/view.php"]').length);
+  console.log("- All course-related elements:", document.querySelectorAll('[class*="course"], [data-region*="course"]').length);
   
+  // Force find any course content
+  console.log("[M2M] FORCE: Looking for ANY course-related content");
+  const allCourseElements = document.querySelectorAll('*[class*="course"], *[data-region*="course"], a[href*="course"]');
+  console.log("[M2M] All course-related elements found:", allCourseElements.length);
+  
+  allCourseElements.forEach((el, i) => {
+    if (i < 5) { // Only log first 5 to avoid spam
+      console.log(`[M2M] Course element ${i+1}:`, el.tagName, el.className, el.textContent?.substring(0, 50));
+    }
+  });
+  
+  // Force immediate course card search
+  console.log("[M2M] FORCE: Immediate course card search");
+  setTimeout(() => {
+    const cards = findCourseCards();
+    console.log("[M2M] FORCE: Immediate search result:", cards.length, "cards");
+    
+    if (cards.length === 0) {
+      console.log("[M2M] FORCE: No cards found, trying to create dummy timetable");
+      
+      // Create emergency wrapper with status
+      const emergencyWrapper = document.createElement("div");
+      emergencyWrapper.id = "emergency-debug-wrapper";
+      emergencyWrapper.style.cssText = `
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        width: 300px;
+        padding: 20px;
+        background: #ffebee;
+        border: 2px solid #f44336;
+        border-radius: 8px;
+        z-index: 10000;
+        font-family: Arial, sans-serif;
+      `;
+      emergencyWrapper.innerHTML = `
+        <h4 style="margin: 0 0 10px 0; color: #d32f2f;">拡張機能デバッグ情報</h4>
+        <p><strong>URL:</strong> ${currentUrl}</p>
+        <p><strong>コースリンク:</strong> ${document.querySelectorAll('a[href*="course/view.php"]').length}個</p>
+        <p><strong>課程要素:</strong> ${allCourseElements.length}個</p>
+        <p><strong>状態:</strong> コース検出失敗</p>
+        <button onclick="this.parentElement.remove()" style="margin-top: 10px;">閉じる</button>
+      `;
+      document.body.appendChild(emergencyWrapper);
+    }
+  }, 1000);
+  
+  // Continue with normal initialization
   console.log("[M2M] Looking for course content with selectors:", ALTERNATIVE_SELECTORS.courseViewContent);
   
   const target = findElement(ALTERNATIVE_SELECTORS.courseViewContent);
