@@ -1,6 +1,11 @@
 // Load parser and table generator via script injection
 // Since we removed ES6 module support from manifest, we'll use global functions
 
+// Debug: Check if required functions are loaded
+console.log("[M2M] Checking required functions:");
+console.log("- parseScheduleInfo available:", typeof parseScheduleInfo);
+console.log("- generateManabaTable available:", typeof generateManabaTable);
+
 const COURSE_CARD_SELECTOR = 'article[data-region="course"]';
 const COURSE_VIEW_CONTENT_SELECTOR = 'div[data-region="course-view-content"]';
 const COURSES_VIEW_SELECTOR = 'div[data-region="courses-view"]';
@@ -156,19 +161,30 @@ function findCourseCards() {
 function init() {
   console.log("[M2M] Content script loaded on:", window.location.href);
   console.log("[M2M] Document ready state:", document.readyState);
+  console.log("[M2M] Extension version: Phase 1 MVP - Fixed Parser");
   
-  // Check if this is the right page
-  if (!window.location.href.includes('/my/') || window.location.href.includes('/my/courses.php')) {
-    console.log("[M2M] Not on dashboard page, skipping initialization");
+  // Check URL patterns for Moodle compatibility
+  const currentUrl = window.location.href;
+  console.log("[M2M] Current URL:", currentUrl);
+  
+  // More flexible URL checking
+  const isMoodlePage = (
+    currentUrl.includes('/my/') || 
+    currentUrl.includes('/my') ||
+    currentUrl.includes('moodle') ||
+    document.title.toLowerCase().includes('moodle') ||
+    document.querySelector('meta[name="generator"][content*="Moodle"]') ||
+    document.querySelector('.moodle-footer') ||
+    document.querySelector('#page-my-index')
+  );
+  
+  console.log("[M2M] Detected as Moodle page:", isMoodlePage);
+  
+  if (!isMoodlePage) {
+    console.log("[M2M] Not detected as Moodle page, skipping initialization");
     return;
   }
-  
-  // Log page structure for debugging
-  console.log("[M2M] Page structure analysis:");
-  console.log("- Body classes:", document.body.className);
-  console.log("- Main elements:", Array.from(document.querySelectorAll('main, #page-content, #region-main')).map(el => el.id || el.className));
-  console.log("- Course-related elements:", Array.from(document.querySelectorAll('[class*="course"], [data-region*="course"]')).length);
-  
+
   console.log("[M2M] Looking for course content with selectors:", ALTERNATIVE_SELECTORS.courseViewContent);
   
   const target = findElement(ALTERNATIVE_SELECTORS.courseViewContent);
@@ -289,6 +305,7 @@ function scheduleProcessing() {
     
     if (!cards.length) {
       retryCount++;
+      console.log("[M2M] No course cards found, retry count:", retryCount);
       if (retryCount < MAX_RETRIES) {
         const delay = Math.min(BASE_RETRY_DELAY_MS + (retryCount * RETRY_DELAY_INCREMENT_MS), MAX_RETRY_DELAY_MS); // Progressive delay
         console.log("[M2M] No course cards found, retrying in", delay, "ms...");
@@ -581,7 +598,7 @@ function hideOriginalCourseView() {
   console.log("[M2M] Minimizing original course view (not hiding completely)...");
   const target = findElement(ALTERNATIVE_SELECTORS.courseViewContent);
   if (target) {
-    target.setAttribute("data-manaba-hidden", "true");
+    // Don't set data-manaba-hidden, just reduce opacity to keep content visible
     // Lighter minimization - just reduce opacity slightly
     target.style.cssText = `
       opacity: 0.7 !important;
@@ -597,7 +614,6 @@ function restoreOriginalCourseView() {
   console.log("[M2M] Restoring original course view...");
   const target = findElement(ALTERNATIVE_SELECTORS.courseViewContent);
   if (target) {
-    target.removeAttribute("data-manaba-hidden");
     target.style.cssText = "";
     console.log("[M2M] Original course view restored");
   }
@@ -680,7 +696,7 @@ function monitorNetworkActivity() {
     console.log("[M2M] Loading check - Indicators:", indicators.length, "Placeholders:", placeholders.length, "Course links:", courseLinks.length);
     
     // If we have course links and no loading indicators, content is likely loaded
-    if (courseLinks.length > 0 && indicators.length === 0 && placeholders.length === 0) {
+    if (courseLinks.length > 0 && indicators.length === 0 && placeholders.length < MAX_LOADING_PLACEHOLDERS) {
       console.log("[M2M] Network activity appears complete, triggering course processing");
       clearInterval(checkInterval);
       setTimeout(() => scheduleProcessing(), 1000);
