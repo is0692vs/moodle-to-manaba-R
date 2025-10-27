@@ -74,46 +74,56 @@ async function saveToCache(courses) {
   try {
     const cacheData = {
       timestamp: Date.now(),
-      courses: courses
+      courses: courses,
     };
     await chrome.storage.local.set({ moodle_courses_cache: cacheData });
-    console.log('[M2M] Saved', courses.length, 'courses to cache');
+    console.log("[M2M] Saved", courses.length, "courses to cache");
   } catch (error) {
-    console.error('[M2M] Failed to save cache:', error);
+    console.error("[M2M] Failed to save cache:", error);
   }
 }
 
 async function loadFromCache() {
   try {
-    const result = await chrome.storage.local.get('moodle_courses_cache');
+    const result = await chrome.storage.local.get("moodle_courses_cache");
     if (!result.moodle_courses_cache) {
-      console.log('[M2M] No cache found');
+      console.log("[M2M] No cache found");
       return null;
     }
-    
+
     const cacheData = result.moodle_courses_cache;
     const age = Date.now() - cacheData.timestamp;
-    
+
     if (age > CACHE_EXPIRY_MS) {
-      console.log('[M2M] Cache expired (age:', Math.round(age / 1000), 'seconds)');
+      console.log(
+        "[M2M] Cache expired (age:",
+        Math.round(age / 1000),
+        "seconds)"
+      );
       await clearCache();
       return null;
     }
-    
-    console.log('[M2M] Loaded', cacheData.courses.length, 'courses from cache (age:', Math.round(age / 1000), 'seconds)');
+
+    console.log(
+      "[M2M] Loaded",
+      cacheData.courses.length,
+      "courses from cache (age:",
+      Math.round(age / 1000),
+      "seconds)"
+    );
     return cacheData.courses;
   } catch (error) {
-    console.error('[M2M] Failed to load cache:', error);
+    console.error("[M2M] Failed to load cache:", error);
     return null;
   }
 }
 
 async function clearCache() {
   try {
-    await chrome.storage.local.remove('moodle_courses_cache');
-    console.log('[M2M] Cache cleared');
+    await chrome.storage.local.remove("moodle_courses_cache");
+    console.log("[M2M] Cache cleared");
   } catch (error) {
-    console.error('[M2M] Failed to clear cache:', error);
+    console.error("[M2M] Failed to clear cache:", error);
   }
 }
 
@@ -250,9 +260,10 @@ async function init() {
   // 拡張機能の有効/無効をチェック
   try {
     const result = await chrome.storage.sync.get("extensionEnabled");
-    isExtensionEnabled = result.extensionEnabled !== undefined ? result.extensionEnabled : true;
+    isExtensionEnabled =
+      result.extensionEnabled !== undefined ? result.extensionEnabled : true;
     console.log("[M2M] Extension enabled:", isExtensionEnabled);
-    
+
     if (!isExtensionEnabled) {
       console.log("[M2M] Extension is disabled, skipping initialization");
       return;
@@ -420,18 +431,29 @@ function attemptTableGeneration(attempt = 0) {
     console.log("[M2M] Extension is disabled, skipping table generation");
     return;
   }
-  
-  console.log("[M2M] Attempt", attempt + 1, "of", MAX_RETRIES, "to generate table");
+
+  console.log(
+    "[M2M] Attempt",
+    attempt + 1,
+    "of",
+    MAX_RETRIES,
+    "to generate table"
+  );
   const cards = findCourseCards();
-  
+
   if (cards.length > 0) {
-    console.log("[M2M] Found", cards.length, "course cards on attempt", attempt + 1);
+    console.log(
+      "[M2M] Found",
+      cards.length,
+      "course cards on attempt",
+      attempt + 1
+    );
     scheduleProcessing();
     return;
   }
-  
+
   if (attempt < MAX_RETRIES - 1) {
-    const delay = BASE_RETRY_DELAY_MS + (attempt * RETRY_DELAY_INCREMENT_MS);
+    const delay = BASE_RETRY_DELAY_MS + attempt * RETRY_DELAY_INCREMENT_MS;
     console.log("[M2M] No cards found, retrying in", delay, "ms...");
     setTimeout(() => attemptTableGeneration(attempt + 1), delay);
   } else {
@@ -909,7 +931,7 @@ async function applyColorSettings() {
 // メッセージリスナー（ポップアップからの色更新、ON/OFF切り替え、キャッシュクリア）
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log("[M2M] Received message:", message);
-  
+
   if (message.action === "updateColors") {
     console.log("[M2M] Received color update message:", message.colors);
     applyColorSettings();
@@ -917,10 +939,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   } else if (message.action === "toggleExtension") {
     console.log("[M2M] Toggling extension to:", message.enabled);
     isExtensionEnabled = message.enabled;
-    
+
     if (message.enabled) {
       // 有効化: キャッシュがあればそこから、なければ再取得
-      loadFromCache().then(cachedCourses => {
+      loadFromCache().then((cachedCourses) => {
         if (cachedCourses && cachedCourses.length > 0) {
           hideOriginalCourseView();
           renderTimetable(cachedCourses);
@@ -933,7 +955,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // 無効化: テーブル削除、元のビュー復元
       restoreOriginalCourseView();
     }
-    
+
     sendResponse({ success: true });
   } else if (message.action === "clearCache") {
     console.log("[M2M] Clearing cache and reloading...");
