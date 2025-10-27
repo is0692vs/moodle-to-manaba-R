@@ -1,0 +1,51 @@
+name: Create Release
+
+on:
+    push:
+        tags:
+            - "v*"
+
+jobs:
+    release:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Get version from tag
+              id: version
+              run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+            - name: Create distribution package
+              run: |
+                  cd moodle-to-manaba-extension
+                  mkdir -p dist
+
+                  # Copy only necessary files for the extension
+                  cp manifest.json dist/
+                  cp popup.html dist/
+                  cp popup.js dist/
+                  cp -r src dist/
+                  cp -r icons dist/
+
+                  # Create zip file
+                  cd dist
+                  zip -r ../moodle-to-manaba-extension-v${{ steps.version.outputs.VERSION }}.zip .
+                  cd ..
+
+                  # Move zip to root for release
+                  mv moodle-to-manaba-extension-v${{ steps.version.outputs.VERSION }}.zip ../
+
+            - name: Create Release
+              uses: softprops/action-gh-release@v1
+              with:
+                  files: |
+                      moodle-to-manaba-extension-v${{ steps.version.outputs.VERSION }}.zip
+                  generate_release_notes: true
+                  draft: false
+                  prerelease: false
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

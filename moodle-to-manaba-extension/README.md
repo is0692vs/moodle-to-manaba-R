@@ -1,4 +1,4 @@
-# Moodle to manaba Timetable Extension (Phase 1 MVP)
+# Moodle to manaba Timetable Extension
 
 Moodle のコースリストを manaba スタイルの時間割表示に変換する Chrome 拡張機能です。
 
@@ -16,10 +16,23 @@ Moodle のコースリストを manaba スタイルの時間割表示に変換�
 
 ## インストール方法
 
-1. Chrome 拡張機能の開発者モードを有効にする (`chrome://extensions/`)
-2. 「パッケージ化されていない拡張機能を読み込む」でこのディレクトリを読み込む
-3. Moodle のマイページ（`https://your-university-moodle.edu/my/`）にアクセス
-4. コース一覧が manaba スタイルの時間割テーブルに置き換わることを確認
+### ユーザー向け（推奨）
+
+詳しいインストール方法は [INSTALL.md](../INSTALL.md) をご覧ください。
+
+**簡単な手順:**
+
+1. [Releases](https://github.com/is0692vs/moodle-to-manaba-R/releases)から最新版の zip ファイルをダウンロード
+2. zip ファイルを展開（解凍）
+3. Chrome で `chrome://extensions/` を開き、デベロッパーモードを ON
+4. 「パッケージ化されていない拡張機能を読み込む」で展開したフォルダを選択
+
+### 開発者向け
+
+1. このリポジトリをクローン: `git clone https://github.com/is0692vs/moodle-to-manaba-R.git`
+2. Chrome で `chrome://extensions/` を開き、デベロッパーモードを ON
+3. 「パッケージ化されていない拡張機能を読み込む」で `moodle-to-manaba-extension` ディレクトリを選択
+4. Moodle のマイページにアクセスして動作確認
 
 ## ディレクトリ構成
 
@@ -71,30 +84,30 @@ moodle-to-manaba-extension/
 - ネットワーク遅延時の詳細なローディング表示は簡易版
 - キャッシュ機能は実装済み（メモリ内、セッション限定）
 
-## 設定
+## 対応サイト
 
-使用する大学に合わせて `manifest.json` の以下の部分を変更してください：
+デフォルトでは全ての HTTPS サイトで動作しますが、主に Moodle のマイページでの使用を想定しています。
 
-```json
-{
-  "host_permissions": [
-    "https://manaba.your-university.edu/*",
-    "https://moodle.your-university.edu/*"
-  ],
-  "content_scripts": [
-    {
-      "matches": [
-        "https://moodle.your-university.edu/my/*",
-        "https://moodle.your-university.edu/my"
-      ]
-    }
-  ]
-}
-```
+## リリース方法（開発者向け）
 
-## 今後の改善予定（Phase 2/3）
+1. `manifest.json` のバージョンを更新
+2. 変更をコミット: `git commit -am "Bump version to X.X.X"`
+3. タグを作成: `git tag vX.X.X`
+4. タグをプッシュ: `git push origin vX.X.X`
+5. GitHub Actions が自動的に zip ファイルを作成してリリースページに公開します
+
+## 今後の改善予定
 
 - 詳細なエラーハンドリングとユーザーフィードバック
 - パフォーマンス最適化（バッチ処理、並列処理）
 - 永続化キャッシュ（ローカルストレージ）
 - ユーザー設定（表示設定、フィルタリング）
+- Chrome Web Store での公開
+
+## ライセンス
+
+このプロジェクトのライセンスについては [LICENSE](../LICENSE) をご覧ください。
+
+## 貢献
+
+バグ報告や機能リクエストは [Issues](https://github.com/is0692vs/moodle-to-manaba-R/issues) でお願いします。
