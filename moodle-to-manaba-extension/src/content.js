@@ -755,25 +755,25 @@ function showStatus(message) {
 // 色設定を適用
 async function applyColorSettings() {
   try {
-    const result = await chrome.storage.sync.get('timetableColors');
+    const result = await chrome.storage.sync.get("timetableColors");
     const colors = result.timetableColors || {
-      emptyCellColor: '#ffffff',
-      courseCellColor: '#f0f8ff',
-      headerColor: '#e8f4f8',
-      linkColor: '#0066cc',
-      borderColor: '#c8d7e1'
+      emptyCellColor: "#ffffff",
+      courseCellColor: "#f0f8ff",
+      headerColor: "#e8f4f8",
+      linkColor: "#0066cc",
+      borderColor: "#c8d7e1",
     };
-    
-    console.log('[M2M] Applying color settings:', colors);
-    
+
+    console.log("[M2M] Applying color settings:", colors);
+
     // スタイルタグを作成または更新
-    let styleTag = document.getElementById('m2m-custom-colors');
+    let styleTag = document.getElementById("m2m-custom-colors");
     if (!styleTag) {
-      styleTag = document.createElement('style');
-      styleTag.id = 'm2m-custom-colors';
+      styleTag = document.createElement("style");
+      styleTag.id = "m2m-custom-colors";
       document.head.appendChild(styleTag);
     }
-    
+
     styleTag.textContent = `
       .stdlist td.course {
         background: ${colors.emptyCellColor} !important;
@@ -799,14 +799,14 @@ async function applyColorSettings() {
       }
     `;
   } catch (error) {
-    console.error('[M2M] Failed to apply color settings:', error);
+    console.error("[M2M] Failed to apply color settings:", error);
   }
 }
 
 // メッセージリスナー（ポップアップからの色更新）
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === 'updateColors') {
-    console.log('[M2M] Received color update message:', message.colors);
+  if (message.action === "updateColors") {
+    console.log("[M2M] Received color update message:", message.colors);
     applyColorSettings();
     sendResponse({ success: true });
   }

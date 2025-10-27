@@ -4,7 +4,7 @@
   border: 1px solid #d1e3ed;
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .manaba-timetable-status {
@@ -22,7 +22,7 @@
   background: #fff;
   font-size: 14px;
   table-layout: fixed;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .stdlist th,
@@ -79,7 +79,7 @@
   background: #e3f2fd;
   border-color: #90caf9;
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .courselistweekly-c a {
