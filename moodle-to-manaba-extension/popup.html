@@ -182,6 +182,97 @@
         border-color: #667eea;
         transform: scale(1.05);
       }
+
+      /* トグルスイッチ */
+      .toggle-section {
+        background: white;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      .toggle-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .toggle-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .toggle-label::before {
+        content: "🔄";
+        font-size: 18px;
+      }
+
+      .toggle-switch {
+        position: relative;
+        width: 50px;
+        height: 26px;
+      }
+
+      .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.3s;
+        border-radius: 26px;
+      }
+
+      .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 20px;
+        width: 20px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: 0.3s;
+        border-radius: 50%;
+      }
+
+      .toggle-switch input:checked + .toggle-slider {
+        background-color: #667eea;
+      }
+
+      .toggle-switch input:checked + .toggle-slider:before {
+        transform: translateX(24px);
+      }
+
+      .cache-button {
+        width: 100%;
+        padding: 10px;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        color: #666;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-top: 8px;
+      }
+
+      .cache-button:hover {
+        background: #e9ecef;
+        border-color: #adb5bd;
+      }
     </style>
   </head>
   <body>
@@ -191,6 +282,18 @@
     </div>
 
     <div class="content">
+      <!-- ON/OFF切り替え -->
+      <div class="toggle-section">
+        <div class="toggle-container">
+          <span class="toggle-label">機能を有効にする</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="enabledToggle" checked />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <button class="cache-button" id="clearCacheBtn">🗑️ キャッシュをクリア</button>
+      </div>
+
       <div class="section">
         <div class="section-title">セルの背景色</div>
 
