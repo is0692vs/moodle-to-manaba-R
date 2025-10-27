@@ -69,8 +69,7 @@ async function loadSettings() {
     "extensionEnabled",
   ]);
   const colors = result.timetableColors || DEFAULT_COLORS;
-  const enabled =
-    result.extensionEnabled !== undefined ? result.extensionEnabled : true;
+  const enabled = result.extensionEnabled ?? true;
 
   Object.keys(colorInputs).forEach((key) => {
     colorInputs[key].value = colors[key];

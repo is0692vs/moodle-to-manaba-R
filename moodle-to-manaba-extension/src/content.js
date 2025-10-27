@@ -48,6 +48,7 @@ const RETRY_DELAY_INCREMENT_MS = 500;
 const MAX_RETRY_DELAY_MS = 2500;
 const MAX_LOADING_PLACEHOLDERS = 50;
 const CACHE_EXPIRY_MS = 3600000; // 1時間
+// MAX_RETRIES: テーブル生成とスケジュール処理の両方で使用される最大リトライ回数
 const MAX_RETRIES = 5;
 
 // Course name extraction regex patterns
@@ -260,8 +261,7 @@ async function init() {
   // 拡張機能の有効/無効をチェック
   try {
     const result = await chrome.storage.sync.get("extensionEnabled");
-    isExtensionEnabled =
-      result.extensionEnabled !== undefined ? result.extensionEnabled : true;
+    isExtensionEnabled = result.extensionEnabled ?? true;
     console.log("[M2M] Extension enabled:", isExtensionEnabled);
 
     if (!isExtensionEnabled) {
@@ -531,14 +531,26 @@ async function processCourseCards(courseCards) {
 
     // 並列処理でコース情報を取得
     console.log("[M2M] Loading", courseInfos.length, "courses in parallel...");
+    const failedCourses = [];
     const coursePromises = courseInfos.map((info) =>
       loadCourse(info).catch((error) => {
         console.error("[M2M] Error loading course:", info.name, error);
+        failedCourses.push({ name: info.name, error: error.message });
         return null;
       })
     );
 
     const loadedCourses = await Promise.all(coursePromises);
+
+    // 失敗したコースがあればユーザーに通知
+    if (failedCourses.length > 0) {
+      console.warn(
+        "[M2M] Failed to load",
+        failedCourses.length,
+        "course(s):",
+        failedCourses.map((c) => c.name).join(", ")
+      );
+    }
 
     // フィルタリング: null、schedule無しを除外
     const courses = loadedCourses.filter((course) => {
