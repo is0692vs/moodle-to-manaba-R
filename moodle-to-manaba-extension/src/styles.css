@@ -1,9 +1,10 @@
 .manaba-timetable-container {
   margin-top: 1.5rem;
-  background: #f9fbfd;
+  background: #ffffff;
   border: 1px solid #d1e3ed;
   border-radius: 8px;
-  padding: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .manaba-timetable-status {
@@ -11,6 +12,7 @@
   color: #375a7f;
   font-weight: 600;
   padding: 32px 0;
+  font-size: 14px;
 }
 
 /* manaba スタイルの時間割テーブル */
@@ -18,14 +20,15 @@
   width: 100%;
   border-collapse: collapse;
   background: #fff;
-  font-size: 13px;
+  font-size: 14px;
   table-layout: fixed;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .stdlist th,
 .stdlist td {
   border: 1px solid #c8d7e1;
-  padding: 8px;
+  padding: 10px;
 }
 
 .stdlist th.top {
@@ -33,26 +36,28 @@
   text-align: center;
   font-weight: bold;
   color: #333;
+  font-size: 14px;
 }
 
 .stdlist th.courselistweekly-period {
   background: #e8f4f8;
-  width: 40px;
+  width: 50px;
 }
 
 .stdlist td.period {
   background: #f4f7fa;
-  width: 40px;
+  width: 50px;
   text-align: center;
   font-weight: bold;
-  color: #666;
+  color: #555;
+  font-size: 14px;
 }
 
 .stdlist td.course {
-  min-height: 70px;
+  min-height: 80px;
   vertical-align: top;
   background: #fff;
-  padding: 4px;
+  padding: 6px;
 }
 
 .stdlist td.course-cell {
@@ -62,41 +67,49 @@
 /* manabaスタイルのコース表示 */
 .courselistweekly-nonborder {
   background: #f0f8ff;
-  border: 1px solid #d0e7ff;
-  border-radius: 3px;
-  padding: 6px;
-  margin-bottom: 4px;
+  border: 2px solid #b3d9ff;
+  border-radius: 4px;
+  padding: 8px;
+  margin-bottom: 6px;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .courselistweekly-nonborder:hover {
-  background: #e6f3ff;
+  background: #e3f2fd;
+  border-color: #90caf9;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .courselistweekly-c a {
   color: #0066cc;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 13px;
   display: block;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
+  line-height: 1.4;
 }
 
 .courselistweekly-c a:hover {
   text-decoration: underline;
+  color: #0052a3;
 }
 
 .coursestatus {
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .courselocationinfoV2 {
   font-size: 11px;
-  color: #666;
-  background: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 2px;
-  padding: 2px 4px;
+  color: #555;
+  background: #e8f4f8;
+  border: 1px solid #b3d9ff;
+  border-radius: 3px;
+  padding: 3px 6px;
   display: inline-block;
+  font-weight: 500;
 }
 
 [data-region="course-view-content"][data-manaba-hidden="true"] {

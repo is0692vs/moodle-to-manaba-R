@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>時間割設定</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        width: 320px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+          "Helvetica Neue", Arial, sans-serif;
+        font-size: 14px;
+        color: #333;
+        background: #f8f9fa;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 16px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+
+      .header p {
+        font-size: 12px;
+        opacity: 0.9;
+      }
+
+      .content {
+        padding: 16px;
+      }
+
+      .section {
+        background: white;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      .section-title {
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: #555;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .section-title::before {
+        content: "";
+        display: inline-block;
+        width: 3px;
+        height: 14px;
+        background: #667eea;
+        border-radius: 2px;
+      }
+
+      .color-option {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #f0f0f0;
+      }
+
+      .color-option:last-child {
+        border-bottom: none;
+      }
+
+      .color-label {
+        font-size: 13px;
+        color: #666;
+      }
+
+      .color-input-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      input[type="color"] {
+        width: 40px;
+        height: 32px;
+        border: 2px solid #e0e0e0;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: border-color 0.2s;
+      }
+
+      input[type="color"]:hover {
+        border-color: #667eea;
+      }
+
+      .color-value {
+        font-family: "Monaco", "Courier New", monospace;
+        font-size: 11px;
+        color: #888;
+        min-width: 70px;
+      }
+
+      .button-group {
+        display: flex;
+        gap: 8px;
+        margin-top: 16px;
+      }
+
+      button {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .btn-primary {
+        background: #667eea;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #5568d3;
+      }
+
+      .btn-secondary {
+        background: #e9ecef;
+        color: #666;
+      }
+
+      .btn-secondary:hover {
+        background: #dee2e6;
+      }
+
+      .status {
+        text-align: center;
+        padding: 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        margin-top: 12px;
+        display: none;
+      }
+
+      .status.success {
+        background: #d4edda;
+        color: #155724;
+        display: block;
+      }
+
+      .preset-colors {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-top: 8px;
+      }
+
+      .preset-color {
+        width: 100%;
+        height: 32px;
+        border: 2px solid #e0e0e0;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .preset-color:hover {
+        border-color: #667eea;
+        transform: scale(1.05);
+      }
+
+      /* トグルスイッチ */
+      .toggle-section {
+        background: white;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      .toggle-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .toggle-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .toggle-label::before {
+        content: "🔄";
+        font-size: 18px;
+      }
+
+      .toggle-switch {
+        position: relative;
+        width: 50px;
+        height: 26px;
+      }
+
+      .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.3s;
+        border-radius: 26px;
+      }
+
+      .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 20px;
+        width: 20px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: 0.3s;
+        border-radius: 50%;
+      }
+
+      .toggle-switch input:checked + .toggle-slider {
+        background-color: #667eea;
+      }
+
+      .toggle-switch input:checked + .toggle-slider:before {
+        transform: translateX(24px);
+      }
+
+      .cache-button {
+        width: 100%;
+        padding: 10px;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        color: #666;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-top: 8px;
+      }
+
+      .cache-button:hover {
+        background: #e9ecef;
+        border-color: #adb5bd;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>⏰ 時間割の色設定</h1>
+      <p>カラーを選んでカスタマイズ</p>
+    </div>
+
+    <div class="content">
+      <!-- ON/OFF切り替え -->
+      <div class="toggle-section">
+        <div class="toggle-container">
+          <span class="toggle-label">機能を有効にする</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="enabledToggle" checked />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <button class="cache-button" id="clearCacheBtn">
+          🗑️ キャッシュをクリア
+        </button>
+      </div>
+
+      <div class="section">
+        <div class="section-title">セルの背景色</div>
+
+        <div class="color-option">
+          <span class="color-label">空きセル</span>
+          <div class="color-input-wrapper">
+            <input type="color" id="emptyCellColor" value="#ffffff" />
+            <span class="color-value" id="emptyCellValue">#ffffff</span>
+          </div>
+        </div>
+
+        <div class="color-option">
+          <span class="color-label">授業セル</span>
+          <div class="color-input-wrapper">
+            <input type="color" id="courseCellColor" value="#f0f8ff" />
+            <span class="color-value" id="courseCellValue">#f0f8ff</span>
+          </div>
+        </div>
+
+        <div class="color-option">
+          <span class="color-label">ヘッダー</span>
+          <div class="color-input-wrapper">
+            <input type="color" id="headerColor" value="#e8f4f8" />
+            <span class="color-value" id="headerValue">#e8f4f8</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">テキストとボーダー</div>
+
+        <div class="color-option">
+          <span class="color-label">リンク色</span>
+          <div class="color-input-wrapper">
+            <input type="color" id="linkColor" value="#0066cc" />
+            <span class="color-value" id="linkValue">#0066cc</span>
+          </div>
+        </div>
+
+        <div class="color-option">
+          <span class="color-label">ボーダー色</span>
+          <div class="color-input-wrapper">
+            <input type="color" id="borderColor" value="#c8d7e1" />
+            <span class="color-value" id="borderValue">#c8d7e1</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">プリセット</div>
+        <div class="preset-colors">
+          <div
+            class="preset-color"
+            style="
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            "
+            data-preset="purple"
+            title="紫グラデーション"
+          ></div>
+          <div
+            class="preset-color"
+            style="
+              background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            "
+            data-preset="pink"
+            title="ピンクグラデーション"
+          ></div>
+          <div
+            class="preset-color"
+            style="
+              background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            "
+            data-preset="blue"
+            title="青グラデーション"
+          ></div>
+          <div
+            class="preset-color"
+            style="
+              background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            "
+            data-preset="green"
+            title="緑グラデーション"
+          ></div>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button class="btn-secondary" id="resetBtn">リセット</button>
+        <button class="btn-primary" id="saveBtn">保存</button>
+      </div>
+
+      <div class="status success" id="status">設定を保存しました!</div>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
