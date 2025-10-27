@@ -43,9 +43,9 @@ const ALTERNATIVE_SELECTORS = {
 };
 
 // Timing constants
-const BASE_RETRY_DELAY_MS = 3000;
-const RETRY_DELAY_INCREMENT_MS = 2000;
-const MAX_RETRY_DELAY_MS = 10000;
+const BASE_RETRY_DELAY_MS = 1000;
+const RETRY_DELAY_INCREMENT_MS = 500;
+const MAX_RETRY_DELAY_MS = 5000;
 const MAX_LOADING_PLACEHOLDERS = 50;
 
 // Course name extraction regex patterns
@@ -97,7 +97,7 @@ function findCourseCards() {
       setTimeout(() => {
         console.log("[M2M] Retrying course card search after loading delay...");
         scheduleProcessing();
-      }, 5000);
+      }, 2000);
       return [];
     } else {
       console.log("[M2M] Found some real course elements, proceeding with extraction");
@@ -198,11 +198,11 @@ function init() {
 
   startObserver(target);
   
-  // Start with a longer initial delay to allow content to load
+  // Start with a short initial delay to allow content to load
   setTimeout(() => {
-    console.log("[M2M] Initial processing after 5 second delay...");
+    console.log("[M2M] Initial processing after 500ms delay...");
     scheduleProcessing();
-  }, 5000);
+  }, 500);
   
   // Also monitor for network activity to detect when loading is complete
   monitorNetworkActivity();
@@ -272,13 +272,13 @@ function waitForCourseContainer() {
   
   // Also set up a fallback timer
   setTimeout(() => {
-    console.log("[M2M] Fallback timer - checking for content after 5 seconds");
+    console.log("[M2M] Fallback timer - checking for content after 3 seconds");
     const target = findElement(ALTERNATIVE_SELECTORS.courseViewContent);
     if (target && !observer) {
       startObserver(target);
       scheduleProcessing();
     }
-  }, 5000);
+  }, 3000);
 }
 
 function startObserver(target) {
@@ -350,25 +350,29 @@ async function processCourseCards(courseCards) {
   try {
     showStatus("manabaスタイルの時間割を生成しています…");
     
-    const courses = [];
-    for (const info of courseInfos) {
-      console.log("[M2M] Loading course:", info.name);
-      try {
-        const course = await loadCourse(info);
-        if (!course) {
-          console.log("[M2M] Failed to load course:", info.name);
-          continue;
-        }
-        if (!course.schedule.length) {
-          console.log("[M2M] Course has no schedule:", info.name);
-          continue;
-        }
-        console.log("[M2M] Course loaded with schedule:", course.name, "Schedule:", course.schedule);
-        courses.push(course);
-      } catch (error) {
+    // 並列処理でコース情報を取得
+    console.log("[M2M] Loading", courseInfos.length, "courses in parallel...");
+    const coursePromises = courseInfos.map(info => 
+      loadCourse(info).catch(error => {
         console.error("[M2M] Error loading course:", info.name, error);
+        return null;
+      })
+    );
+    
+    const loadedCourses = await Promise.all(coursePromises);
+    
+    // フィルタリング: null、schedule無しを除外
+    const courses = loadedCourses.filter(course => {
+      if (!course) {
+        return false;
       }
-    }
+      if (!course.schedule.length) {
+        console.log("[M2M] Course has no schedule:", course.name);
+        return false;
+      }
+      console.log("[M2M] Course loaded with schedule:", course.name, "Schedule:", course.schedule);
+      return true;
+    });
 
     console.log("[M2M] Courses with schedule:", courses.length);
     
@@ -703,8 +707,8 @@ function monitorNetworkActivity() {
     }
   };
   
-  // Check every 2 seconds for loading completion
-  checkInterval = setInterval(checkLoadingComplete, 2000);
+  // Check every 500ms for loading completion
+  checkInterval = setInterval(checkLoadingComplete, 500);
   
   // Stop monitoring after 30 seconds
   setTimeout(() => {
