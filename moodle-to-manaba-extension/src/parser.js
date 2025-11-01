@@ -130,23 +130,9 @@ function parseScheduleInfo(doc) {
     }
   }
 
-  const dedupedSchedules = dedupeSchedules(schedules);
-  console.log("[Parser] Final schedules:", dedupedSchedules);
+  console.log("[Parser] Final schedules:", schedules);
   
-  return dedupedSchedules;
-}
-
-function dedupeSchedules(schedules) {
-  const seen = new Set();
-  return schedules.filter((entry) => {
-    const key = makeKey(entry.dayOfWeek, entry.period);
-    if (seen.has(key)) {
-      console.log("[Parser] Removing duplicate:", key);
-      return false;
-    }
-    seen.add(key);
-    return true;
-  });
+  return schedules;
 }
 
 function makeKey(day, period) {
