@@ -6,10 +6,10 @@ const SCHEDULE_PATTERNS = [
   /([月火水木金土日])\s*([0-9]{1,2})\s*\([0-9]+-[0-9]+\)/g,
   // Pattern 2: 金1,2,3 - comma separated periods
   /([月火水木金土日])\s*([0-9]{1,2}(?:\s*,\s*[0-9]{1,2})*)/g,
-  // Pattern 3: 金1-3 - actual range without parentheses  
+  // Pattern 3: 金1-3 - actual range without parentheses
   /([月火水木金土日])\s*([0-9]{1,2})\s*-\s*([0-9]{1,2})/g,
   // Pattern 4: Simple 金1
-  /([月火水木金土日])\s*([0-9]{1,2})/g
+  /([月火水木金土日])\s*([0-9]{1,2})/g,
 ];
 
 const LOCATION_REGEX = /^\s*([月火水木金土日])\s*([0-9]{1,2})\s*[：:](.+)$/;
@@ -28,7 +28,7 @@ const LOCATION_REGEX = /^\s*([月火水木金土日])\s*([0-9]{1,2})\s*[：:](.+
  */
 function parseScheduleInfo(doc) {
   console.log("[Parser] Starting schedule parsing...");
-  
+
   const summaryRoot = doc.querySelector(
     "section.block_course_summary .text_to_html"
   );
@@ -64,7 +64,7 @@ function parseScheduleInfo(doc) {
 
   const scheduleText = rawText.join(" ");
   console.log("[Parser] Combined schedule text:", scheduleText);
-  
+
   const schedules = [];
 
   // Try each pattern in order of specificity
@@ -75,10 +75,10 @@ function parseScheduleInfo(doc) {
 
     // Reset regex state
     pattern.lastIndex = 0;
-    
+
     while ((match = pattern.exec(scheduleText)) !== null) {
       console.log("[Parser] Pattern", i + 1, "matched:", match);
-      
+
       if (i === 0) {
         // Pattern 1: 金1(1-2) - ignore the parentheses, treat as single period
         const [, day, periodStr] = match;
@@ -86,13 +86,20 @@ function parseScheduleInfo(doc) {
         if (DAY_KANJI.includes(day) && !Number.isNaN(period)) {
           const classroom = locationMap.get(makeKey(day, period));
           patternSchedules.push({ dayOfWeek: day, period, classroom });
-          console.log("[Parser] Added single period (ignoring range):", day, period);
+          console.log(
+            "[Parser] Added single period (ignoring range):",
+            day,
+            period
+          );
         }
       } else if (i === 1) {
         // Pattern 2: 金1,2,3 - comma separated
         const [, day, periodsStr] = match;
-        const periods = periodsStr.split(',').map(p => parseInt(p.trim(), 10)).filter(p => !Number.isNaN(p));
-        periods.forEach(period => {
+        const periods = periodsStr
+          .split(",")
+          .map((p) => parseInt(p.trim(), 10))
+          .filter((p) => !Number.isNaN(p));
+        periods.forEach((period) => {
           if (DAY_KANJI.includes(day)) {
             const classroom = locationMap.get(makeKey(day, period));
             patternSchedules.push({ dayOfWeek: day, period, classroom });
@@ -104,7 +111,12 @@ function parseScheduleInfo(doc) {
         const [, day, startStr, endStr] = match;
         const start = parseInt(startStr, 10);
         const end = parseInt(endStr, 10);
-        if (DAY_KANJI.includes(day) && !Number.isNaN(start) && !Number.isNaN(end) && end >= start) {
+        if (
+          DAY_KANJI.includes(day) &&
+          !Number.isNaN(start) &&
+          !Number.isNaN(end) &&
+          end >= start
+        ) {
           for (let period = start; period <= end; period++) {
             const classroom = locationMap.get(makeKey(day, period));
             patternSchedules.push({ dayOfWeek: day, period, classroom });
@@ -124,16 +136,42 @@ function parseScheduleInfo(doc) {
     }
 
     if (patternSchedules.length > 0) {
-      console.log("[Parser] Pattern", i + 1, "found", patternSchedules.length, "periods");
+      console.log(
+        "[Parser] Pattern",
+        i + 1,
+        "found",
+        patternSchedules.length,
+        "periods"
+      );
       schedules.push(...patternSchedules);
       break; // Use only the first matching pattern to avoid duplicates
     }
   }
 
   console.log("[Parser] Final schedules:", schedules);
-  
+
   return schedules;
 }
+
+/**
+ * 同じ時間帯の授業を重複とみなして除外する関数
+ * 同じ曜日・時限に複数の授業が登録されている場合に使用
+ * 現在はコメントアウトされており、使用されていない
+ */
+/*
+function dedupeSchedules(schedules) {
+  const seen = new Set();
+  return schedules.filter(schedule => {
+    const key = `${schedule.dayOfWeek}-${schedule.period}`;
+    if (seen.has(key)) {
+      console.log("[Parser] Duplicate schedule removed:", key);
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
+}
+*/
 
 function makeKey(day, period) {
   return `${day}-${period}`;
