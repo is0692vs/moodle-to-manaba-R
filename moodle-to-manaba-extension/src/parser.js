@@ -151,12 +151,17 @@ function parseScheduleInfo(doc, lang = 'ja') {
     }
   }
 
-  const dedupedSchedules = dedupeSchedules(schedules);
-  console.log("[Parser] Final schedules:", dedupedSchedules);
-  
-  return dedupedSchedules;
+  console.log("[Parser] Final schedules:", schedules);
+
+  return schedules;
 }
 
+/**
+ * 同じ時間帯の授業を重複とみなして除外する関数
+ * 同じ曜日・時限に複数の授業が登録されている場合に使用
+ * 現在はコメントアウトされており、使用されていない
+ */
+/*
 function dedupeSchedules(schedules) {
   const seen = new Set();
   return schedules.filter((entry) => {
@@ -169,6 +174,7 @@ function dedupeSchedules(schedules) {
     return true;
   });
 }
+*/
 
 function makeKey(day, period) {
   return `${day}-${period}`;
