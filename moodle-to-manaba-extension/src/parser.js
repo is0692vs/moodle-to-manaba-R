@@ -42,7 +42,7 @@ function getLocationRegex(lang) {
  */
 function parseScheduleInfo(doc, lang = 'ja') {
   console.log(`[Parser] Starting schedule parsing for lang: ${lang}...`);
-
+  
   const summaryRoot = doc.querySelector(
     "section.block_course_summary .text_to_html"
   );
@@ -87,7 +87,7 @@ function parseScheduleInfo(doc, lang = 'ja') {
 
   const scheduleText = rawText.join(" ");
   console.log("[Parser] Combined schedule text:", scheduleText);
-
+  
   const schedules = [];
 
   // Try each pattern in order of specificity
@@ -98,10 +98,10 @@ function parseScheduleInfo(doc, lang = 'ja') {
 
     // Reset regex state
     pattern.lastIndex = 0;
-
+    
     while ((match = pattern.exec(scheduleText)) !== null) {
       console.log("[Parser] Pattern", i + 1, "matched:", match);
-
+      
       const day = normalizeDay(match[1]);
 
       if (i === 0) {
@@ -110,11 +110,7 @@ function parseScheduleInfo(doc, lang = 'ja') {
         if (dayList.includes(match[1]) && !Number.isNaN(period)) {
           const classroom = locationMap.get(makeKey(day, period));
           patternSchedules.push({ dayOfWeek: day, period, classroom });
-          console.log(
-            "[Parser] Added single period (ignoring range):",
-            day,
-            period
-          );
+          console.log("[Parser] Added single period (ignoring range):", day, period);
         }
       } else if (i === 1) {
         // Pattern 2: e.g., 金1,2,3
@@ -149,13 +145,7 @@ function parseScheduleInfo(doc, lang = 'ja') {
     }
 
     if (patternSchedules.length > 0) {
-      console.log(
-        "[Parser] Pattern",
-        i + 1,
-        "found",
-        patternSchedules.length,
-        "periods"
-      );
+      console.log("[Parser] Pattern", i + 1, "found", patternSchedules.length, "periods");
       schedules.push(...patternSchedules);
       break; // Use only the first matching pattern to avoid duplicates
     }
@@ -174,10 +164,10 @@ function parseScheduleInfo(doc, lang = 'ja') {
 /*
 function dedupeSchedules(schedules) {
   const seen = new Set();
-  return schedules.filter(schedule => {
-    const key = `${schedule.dayOfWeek}-${schedule.period}`;
+  return schedules.filter((entry) => {
+    const key = makeKey(entry.dayOfWeek, entry.period);
     if (seen.has(key)) {
-      console.log("[Parser] Duplicate schedule removed:", key);
+      console.log("[Parser] Removing duplicate:", key);
       return false;
     }
     seen.add(key);

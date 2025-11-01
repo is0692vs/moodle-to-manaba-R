@@ -11,6 +11,15 @@ const COURSE_VIEW_CONTENT_SELECTOR = 'div[data-region="course-view-content"]';
 const COURSES_VIEW_SELECTOR = 'div[data-region="courses-view"]';
 const WRAPPER_ID = "manaba-timetable-wrapper";
 
+// Function to get the current language from URL
+function getLanguage() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const lang = urlParams.get('lang');
+  // Default to Japanese if lang is not 'en'
+  return lang === 'en' ? 'en' : 'ja';
+}
+
+
 // Add more flexible selectors for different Moodle versions
 const ALTERNATIVE_SELECTORS = {
   courseCards: [
@@ -299,7 +308,8 @@ async function init() {
     console.log("[M2M] Rendering from cache immediately...");
     try {
       hideOriginalCourseView();
-      renderTimetable(cachedCourses);
+      const lang = getLanguage();
+      renderTimetable(cachedCourses, lang);
       hasRendered = true;
       console.log("[M2M] Cache rendering complete");
     } catch (error) {
@@ -531,9 +541,10 @@ async function processCourseCards(courseCards) {
 
     // 並列処理でコース情報を取得
     console.log("[M2M] Loading", courseInfos.length, "courses in parallel...");
+    const lang = getLanguage();
     const failedCourses = [];
     const coursePromises = courseInfos.map((info) =>
-      loadCourse(info).catch((error) => {
+      loadCourse(info, lang).catch((error) => {
         console.error("[M2M] Error loading course:", info.name, error);
         failedCourses.push({ name: info.name, error: error.message });
         return null;
@@ -583,7 +594,8 @@ async function processCourseCards(courseCards) {
     // Only hide original content and render timetable if we have courses to show
     hideOriginalCourseView();
     console.log("[M2M] Rendering timetable...");
-    renderTimetable(courses);
+    const lang = getLanguage();
+    renderTimetable(courses, lang);
     console.log("[M2M] Timetable rendered successfully");
 
     // Debug: Log table structure
@@ -728,14 +740,14 @@ function normalizeUrl(href) {
   }
 }
 
-async function loadCourse(info) {
+async function loadCourse(info, lang) {
   if (courseCache.has(info.url)) {
     return courseCache.get(info.url);
   }
 
   try {
     const doc = await fetchCourseDocument(info.url);
-    const schedule = parseScheduleInfo(doc);
+    const schedule = parseScheduleInfo(doc, lang);
     const course = { ...info, schedule };
     courseCache.set(info.url, course);
     return course;
@@ -756,7 +768,7 @@ async function fetchCourseDocument(url) {
   return parser.parseFromString(html, "text/html");
 }
 
-function renderTimetable(courses) {
+function renderTimetable(courses, lang) {
   try {
     console.log(
       "[M2M] Starting timetable rendering with courses:",
@@ -773,7 +785,7 @@ function renderTimetable(courses) {
     }
 
     console.log("[M2M] Calling generateManabaTable...");
-    const table = generateManabaTable(courses);
+    const table = generateManabaTable(courses, lang);
 
     if (!table || !table.tagName) {
       throw new Error("generateManabaTable returned invalid element");
@@ -957,7 +969,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       loadFromCache().then((cachedCourses) => {
         if (cachedCourses && cachedCourses.length > 0) {
           hideOriginalCourseView();
-          renderTimetable(cachedCourses);
+          const lang = getLanguage();
+          renderTimetable(cachedCourses, lang);
         } else {
           // キャッシュがなければ再トライ
           attemptTableGeneration(0);
