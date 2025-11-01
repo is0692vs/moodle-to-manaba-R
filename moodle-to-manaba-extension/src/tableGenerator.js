@@ -1,20 +1,29 @@
-const DAY_LABELS = ["月", "火", "水", "木", "金", "土"];
+const DAY_MAP_GEN = {
+  "月": "Mon", "火": "Tue", "水": "Wed", "木": "Thu", "金": "Fri", "土": "Sat", "日": "Sun"
+};
+
+const DAY_LABELS_JP = ["月", "火", "水", "木", "金", "土"];
+const DAY_LABELS_EN = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
 const PERIODS = [1, 2, 3, 4, 5, 6, 7];
 
 /**
  * Builds a 7 periods × 6 days table (7×6, periods × days) mirroring the manaba timetable layout.
  * @param {Array<{name: string, url: string, schedule: {dayOfWeek: string, period: number, classroom?: string}[]}>} courses
  *   Courses enriched with schedule data and the derived timetable cells.
+ * @param {string} lang - The language ('ja' or 'en').
  * @returns {HTMLTableElement} Generated timetable element.
  */
-function generateManabaTable(courses) {
+function generateManabaTable(courses, lang = 'ja') {
   const table = document.createElement("table");
   table.classList.add("stdlist", "manaba-timetable");
+  const dayLabels = lang === 'en' ? DAY_LABELS_EN : DAY_LABELS_JP;
+  const internalDayLabels = DAY_LABELS_JP; // Internal key is always JP
 
   const headerRow = table.insertRow();
   headerRow.classList.add("title");
   headerRow.appendChild(createHeaderCell("", "top", "courselistweekly-period"));
-  DAY_LABELS.forEach((day) => {
+  dayLabels.forEach((day) => {
     headerRow.appendChild(createHeaderCell(day, "top", "day"));
   });
 
@@ -28,7 +37,7 @@ function generateManabaTable(courses) {
     periodCell.classList.add("period");
     periodCell.textContent = String(period);
 
-    DAY_LABELS.forEach((day) => {
+    internalDayLabels.forEach((day) => {
       const cell = row.insertCell();
       cell.classList.add("course");
 
@@ -43,7 +52,7 @@ function generateManabaTable(courses) {
       cell.classList.add("course-cell");
 
       entries.forEach(({ course, schedule }) => {
-        cell.appendChild(createCourseEntry(course, schedule));
+        cell.appendChild(createCourseEntry(course, schedule, lang));
       });
     });
   });
@@ -74,7 +83,7 @@ function buildCellMap(courses) {
   return map;
 }
 
-function createCourseEntry(course, schedule) {
+function createCourseEntry(course, schedule, lang) {
   const container = document.createElement("div");
   container.classList.add("courselistweekly-nonborder", "courselistweekly-c");
 
@@ -98,11 +107,12 @@ function createCourseEntry(course, schedule) {
 
     const locationDiv = document.createElement("div");
     locationDiv.classList.add("courselocationinfo", "courselocationinfoV2");
-    locationDiv.textContent = `${schedule.dayOfWeek}${schedule.period}:${schedule.classroom}`;
-    locationDiv.setAttribute(
-      "title",
-      `${schedule.dayOfWeek}${schedule.period}:${schedule.classroom}`
-    );
+
+    const displayDay = lang === 'en' ? DAY_MAP_GEN[schedule.dayOfWeek] : schedule.dayOfWeek;
+    const locationText = `${displayDay}${schedule.period}:${schedule.classroom}`;
+
+    locationDiv.textContent = locationText;
+    locationDiv.setAttribute("title", locationText);
 
     statusDiv.appendChild(locationDiv);
     container.appendChild(statusDiv);
@@ -115,6 +125,5 @@ function makeKey(day, period) {
   return `${day}-${period}`;
 }
 
-// Make DAY_LABELS and PERIODS available globally if needed
-window.M2M_DAY_LABELS = DAY_LABELS;
+// Make PERIODS available globally if needed
 window.M2M_PERIODS = PERIODS;
