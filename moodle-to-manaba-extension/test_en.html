@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Moodle-to-manaba Test (EN)</title>
+  <link rel="stylesheet" href="http://localhost:8000/src/styles.css">
+</head>
+<body>
+  <h1>英語テストページ</h1>
+  <div data-region="courses-view">
+    <div data-region="course-view-content">
+        <article data-region="course">
+            <a href="http://localhost:8000/course/view.php?id=12345">52103:Physical Education 2(C) (24)</a>
+        </article>
+    </div>
+  </div>
+  <template id="course-detail-template">
+    <section class="block_course_summary">
+        <div class="text_to_html">
+        <p>Fall:F・Fri1(1-2)</p>
+        <p>Fri1:トレーニングルーム</p>
+        </div>
+    </section>
+  </template>
+
+  <script src="http://localhost:8000/src/parser.js"></script>
+  <script src="http://localhost:8000/src/tableGenerator.js"></script>
+  <script src="http://localhost:8000/src/content.js"></script>
+</body>
+</html>
